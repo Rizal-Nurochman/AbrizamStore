@@ -5,7 +5,10 @@ import "gorm.io/gorm"
 type User struct {
 	gorm.Model
 	Name							string
-	Email							string	`gorm:"uniqueIndex"`
+	Email							string						`gorm:"uniqueIndex"`
 	Password					string
-	ProfileImage			string	`gorm:"omitempty"`
+	ProfileImage			string						`gorm:"omitempty"`
+
+	Pembelian			[]Pembelian						`gorm:"foreignkey:ID_User"`
+	Penjualan			[]Penjualan						`gorm:"foreignkey:ID_User"`
 }
