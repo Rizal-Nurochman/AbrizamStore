@@ -4,11 +4,11 @@ import "gorm.io/gorm"
 
 type User struct {
 	gorm.Model
-	Name							string
-	Email							string						`gorm:"uniqueIndex"`
-	Password					string
-	ProfileImage			string						`gorm:"omitempty"`
+	Name         string `json:"name"`
+	Email        string `json:"email" gorm:"uniqueIndex"`
+	Password     string `json:"password"`
+	ProfileImage string `json:"profile_image" gorm:"omitempty"`
 
-	Pembelian			[]Pembelian						`gorm:"foreignkey:ID_User"`
-	Penjualan			[]Penjualan						`gorm:"foreignkey:ID_User"`
+	Pembelian []Pembelian `gorm:"foreignKey:ID_User"`
+	Penjualan []Penjualan `gorm:"foreignKey:ID_User"`
 }

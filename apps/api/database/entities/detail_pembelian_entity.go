@@ -1,12 +1,16 @@
 package entities
 
-type Detai_Pembelian struct {
-	ID_Produk							uint			//foreignkey produk
-	Produk								Produk
-	ID_Pembelian					uint			//foreignkey pembelian
-	Pembelian 						Pembelian
+import "gorm.io/gorm"
 
-	Harga_Beli						int				`gorm:"harga_beli"`
-	Jumlah								int				`gorm:"jumlah"`
-	Subtotal							int				`gorm:"subtotal"`
+type Detail_Pembelian struct {
+	gorm.Model
+	ID_Produk    uint `json:"id_produk"`
+	Produk       Produk `gorm:"foreignKey:ID_Produk"`
+
+	ID_Pembelian uint `json:"id_pembelian"`
+	Pembelian    Pembelian `gorm:"foreignKey:ID_Pembelian"`
+
+	Harga_Beli int `json:"harga_beli"`
+	Jumlah     int `json:"jumlah"`
+	Subtotal   int `json:"subtotal"`
 }

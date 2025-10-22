@@ -4,6 +4,6 @@ import "gorm.io/gorm"
 
 type Kategori struct {
 	gorm.Model
-	Produk						[]Produk				`gorm:"foreignkey:ID_Kategori"`
-	Nama_Kategori			string					`gorm:"nama_kategori"`
+	Nama_Kategori string  `json:"nama_kategori"`
+	Produk        []Produk `gorm:"foreignKey:ID_Kategori;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }

@@ -33,6 +33,11 @@ func ConnectionDatabase() {
 
 	err = db.AutoMigrate(
 		&entities.User{},
+		&entities.Produk{},
+		&entities.Pembelian{},
+		&entities.Detail_Pembelian{},
+		&entities.Detail_Penjualan{},
+		&entities.Kategori{},
 	)
 	if err != nil {
 		log.Fatal("Gagal migrasi tabel: ",err)

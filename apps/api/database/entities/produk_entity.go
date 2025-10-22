@@ -4,13 +4,14 @@ import "gorm.io/gorm"
 
 type Produk struct {
 	gorm.Model
-	Nama_Produk					string						`gorm:"nama_produk"`
-	ID_Kategori					*uint							//ForeignKey kategori
-	Kategori						Kategori
-	Harga_Beli					int 							`gorm:"harga_beli"`
-	Harga_Jual					int								`gorm:"harga_jual"`
-	Stok								int								`gorm:"stok"`
+	Nama_Produk string `json:"nama_produk"`
+	Harga_Beli  int    `json:"harga_beli"`
+	Harga_Jual  int    `json:"harga_jual"`
+	Stok        int    `json:"stok"`
 
-	DetailPembelian			[]Detai_Pembelian		`gorm:"foreignkey:ID_Produk"`
-	DetailPenjualan 		[]Detail_Penjualan	`gorm:"foreignkey:ID_Produk"`
+	ID_Kategori *uint     `json:"id_kategori"`
+	Kategori    Kategori  `gorm:"foreignKey:ID_Kategori"`
+
+	DetailPembelian []Detail_Pembelian `gorm:"foreignKey:ID_Produk"`
+	DetailPenjualan []Detail_Penjualan `gorm:"foreignKey:ID_Produk"`
 }
