@@ -49,7 +49,7 @@ func (r *repository) FindAll(limit int, offset int) ([]entities.Produk, int64, e
 
 func (r *repository) FindByID(ID uint) (*entities.Produk, error) {
 	var produk entities.Produk
-	err := r.db.First(&produk, ID).Error
+	err := r.db.Preload("Kategori").First(&produk, ID).Error
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func (r *repository) FindByName(name string, limit int, offset int) (*[]entities
 	var produks []entities.Produk
 	var total int64
 
-	query := r.db.Model(&entities.Produk{}).Where("name ILIKE ?", "%"+name+"%")
+	query := r.db.Model(&entities.Produk{}).Where("nama_produk ILIKE ?", "%"+name+"%")
 	query.Count(&total)
 
 	err := query.Preload("Kategori").Limit(limit).Offset(offset).Find(&produks).Error
@@ -73,12 +73,11 @@ func (r *repository) FindByName(name string, limit int, offset int) (*[]entities
 }
 
 func (r *repository) Update(ID uint, produk entities.Produk) (*entities.Produk, error) {
-	err := r.db.Save(&produk).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return &produk, nil
+	err := r.db.Model(&entities.Produk{}).Where("id = ?", ID).Updates(produk).Error
+if err != nil {
+    return nil, err
+}
+return &produk, nil
 }
 
 func (r *repository) Delete(ID uint) (error) {
