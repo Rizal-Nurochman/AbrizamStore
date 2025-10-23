@@ -23,7 +23,7 @@ func NewRepository(db *gorm.DB) Repository {
 }
 
 func (r *repository) Create(produk *entities.Produk) error {
-	err := r.db.Create(&produk).Error
+	err := r.db.Create(produk).Error
 	if err != nil {
 		return err
 	}
@@ -36,9 +36,10 @@ func (r *repository) FindAll(limit int, offset int) ([]entities.Produk, int64, e
 	var total int64
 
 	query := r.db.Model(&entities.Produk{})
+	query = query.Preload("Kategori")
 	query.Count(&total)
 
-	err := query.Preload("Kategori").Limit(limit).Offset(offset).Find(&produks).Error
+	err := query.Limit(limit).Offset(offset).Find(&produks).Error
 	if err != nil {
 		return nil, 0, err
 	}
