@@ -1,5 +1,7 @@
 package utils
 
+import "strconv"
+
 type Response struct {
 	Status  bool   `json:"status"`
 	Message string `json:"message"`
@@ -27,4 +29,12 @@ func BuildResponseFailed(message string, err string, data any) Response {
 		Data:    data,
 	}
 	return res
+}
+
+func StringToInt(str string) (int, error) {
+	result, err := strconv.Atoi(str)
+	if err != nil {
+		return 0, err
+	}
+	return int(result), nil
 }
