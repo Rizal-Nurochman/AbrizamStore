@@ -11,11 +11,11 @@ import (
 
 func main() {
 	migrations.ConnectionDatabase()
-
 	DB := migrations.GetDB()
-	router:=gin.Default()
 
-	api:=router.Group("/api/v1")
+	router := gin.Default()
+
+	api := router.Group("/api/v1")
 	{
 		auth.AuthRouter(api, DB)
 		products.ProdukRouter(api, DB)
