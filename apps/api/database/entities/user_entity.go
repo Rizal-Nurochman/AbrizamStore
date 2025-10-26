@@ -7,6 +7,7 @@ type User struct {
 	Name         string `json:"name"`
 	Email        string `json:"email" gorm:"uniqueIndex"`
 	Password     string `json:"password"`
+	Role				 string `json:"role" binding:"omitempty,oneof=admin user"`
 	ProfileImage string `json:"profile_image" gorm:"omitempty"`
 
 	Pembelian []Pembelian `gorm:"foreignKey:ID_User"`

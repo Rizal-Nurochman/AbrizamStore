@@ -11,6 +11,7 @@ type repository struct {
 
 type Repository interface {
 	FindByEmail(email string) (*entities.User, error)
+	FindByID(ID uint) (*entities.User, error)
 	Create(user *entities.User) (*entities.User, error)
 }
 
@@ -30,6 +31,16 @@ func (r *repository) Create(user *entities.User) (*entities.User, error) {
 func (r *repository) FindByEmail(email string) (*entities.User, error) {
 	var existUser entities.User
 	err:=r.db.Where("email = ?",email).First(&existUser).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &existUser, nil
+}
+
+func (r *repository) FindByID(ID uint) (*entities.User, error) {
+	var existUser entities.User
+	err:=r.db.First(&existUser, ID).Error
 	if err != nil {
 		return nil, err
 	}

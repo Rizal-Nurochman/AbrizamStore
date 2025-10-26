@@ -1,6 +1,7 @@
 package products
 
 import (
+	"github.com/abrizamstore/middleware"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -10,13 +11,17 @@ func ProdukRouter(api *gin.RouterGroup, DB *gorm.DB) {
 	produkService := NewService(produkRepo)
 	produkHandler := NewHandler(produkService)
 
-	produk := api.Group("/products")
+	public := api.Group("/products")
 	{
-		produk.POST("/", produkHandler.Create)
-		produk.GET("/", produkHandler.GetAll)
-		produk.GET("/search", produkHandler.GetByName)
-		produk.GET("/:id", produkHandler.GetByID)
-		produk.PUT("/:id", produkHandler.Update)
-		produk.DELETE("/:id", produkHandler.Delete)
+		public.GET("/", produkHandler.GetAll)
+		public.GET("/:id", produkHandler.GetByID)
+	}
+
+	protected := api.Group("/products")
+	protected.Use(middleware.RequireAuthorization("user"))
+	{
+		protected.POST("/", produkHandler.Create)
+		protected.PUT("/:id", produkHandler.Update)
+		protected.DELETE("/:id", produkHandler.Delete)
 	}
 }
