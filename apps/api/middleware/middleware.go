@@ -1,48 +1,50 @@
 package middleware
 
 import (
-	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/abrizamstore/database/entities"
 	"github.com/abrizamstore/database/migrations"
+	"github.com/abrizamstore/package/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
 
 func RequireAuth(c *gin.Context) {
-	//GET COOKIE off req
 	tokenString, err := c.Cookie("Authorization")
 	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		res := utils.BuildResponseFailed("Otentikasi gagal", "Cookie 'Authorization' tidak ditemukan", utils.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, res)
+		return
 	}
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
-		return []byte(os.Getenv("SECRET")), nil
-	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
-	if err != nil {
-		log.Fatal(err)
+		return []byte(os.Getenv("JWT_SECRET")), nil
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()})) 
 
+	if err != nil {
+		res := utils.BuildResponseFailed("Otentikasi gagal", "Token tidak valid atau kedaluwarsa: "+err.Error(), utils.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, res)
+		return
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		if float64(time.Now().Unix()) > claims["exp"].(float64) {
-			c.AbortWithStatus(http.StatusUnauthorized)
-		}
-
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+	
 		var user entities.User
-		migrations.GetDB().Find(&user, claims["sub"])
+		userID := uint(claims["user_id"].(float64))
 
-		if user.ID == 0 {
-			c.AbortWithStatus(http.StatusUnauthorized)
+		if err := migrations.GetDB().Find(&user, userID).Error; err != nil || user.ID == 0 {
+			res := utils.BuildResponseFailed("Otentikasi gagal", "User yang terkait dengan token tidak ditemukan", utils.EmptyObj{})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, res)
+			return
 		}
-		c.Set("user", user)
 
+		c.Set("user", user)
 		c.Next()
+
 	} else {
-		c.AbortWithStatus(http.StatusUnauthorized)
+		res := utils.BuildResponseFailed("Otentikasi gagal", "Klaim token tidak valid", utils.EmptyObj{})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, res)
 	}
 }

@@ -9,7 +9,7 @@ type Produk struct {
 	Harga_Jual  				int    `json:"harga_jual"`
 	Stok        				int    `json:"stok"`
 
-	ID_Kategori 				uint     `json:"id_kategori"`
+	ID_Kategori 				*uint     `json:"id_kategori"`
 	Kategori    				Kategori  `gorm:"foreignKey:ID_Kategori"`
 
 	DetailPembelian 		[]Detail_Pembelian `gorm:"foreignKey:ID_Produk"`

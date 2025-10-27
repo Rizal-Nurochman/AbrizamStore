@@ -5,5 +5,5 @@ type ProdukCreate struct {
 	Harga_Beli		int				`json:"harga_beli" binding:"required,gt=0"`
 	Harga_Jual		int				`json:"harga_jual" binding:"required,gt=0"`
 	Stok					int				`json:"stok" binding:"required,gte=0"`
-	ID_Kategori		uint			`json:"kategori_id"`
+	ID_Kategori		*uint			`json:"kategori_id"`
 }
