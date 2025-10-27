@@ -57,6 +57,7 @@ func (s *service) Register(user dto.UserRegister) (*entities.User, error) {
 		Name: user.Name,
 		Email: user.Email,
 		Password: string(passwordHash),
+		Role: "user",
 	}
 
 	newUser, err := s.repository.Create(userInput)

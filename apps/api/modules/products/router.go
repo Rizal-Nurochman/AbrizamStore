@@ -18,10 +18,10 @@ func ProdukRouter(api *gin.RouterGroup, DB *gorm.DB) {
 	}
 
 	protected := api.Group("/products")
-	protected.Use(middleware.RequireAuth)
+	protected.Use(middleware.RequireAuth(DB))
 	{
-		protected.POST("/", produkHandler.Create)
-		protected.PUT("/:id", produkHandler.Update)
-		protected.DELETE("/:id", produkHandler.Delete)
+		protected.POST("/", middleware.RequireRole("user"), produkHandler.Create)
+		protected.PUT("/:id", middleware.RequireRole("user"), produkHandler.Update)
+		protected.DELETE("/:id", middleware.RequireRole("user"), produkHandler.Delete)
 	}
 }
