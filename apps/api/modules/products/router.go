@@ -18,7 +18,7 @@ func ProdukRouter(api *gin.RouterGroup, DB *gorm.DB) {
 	}
 
 	protected := api.Group("/products")
-	protected.Use(middleware.RequireAuthorization("user"))
+	protected.Use(middleware.RequireAuth)
 	{
 		protected.POST("/", produkHandler.Create)
 		protected.PUT("/:id", produkHandler.Update)

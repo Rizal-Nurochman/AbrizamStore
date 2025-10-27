@@ -1,95 +1,48 @@
 package middleware
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
-	"github.com/abrizamstore/modules/user"
+	"github.com/abrizamstore/database/entities"
+	"github.com/abrizamstore/database/migrations"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt"
-	"gorm.io/gorm"
+	"github.com/golang-jwt/jwt/v4"
 )
 
-var globalDB *gorm.DB
-
-func InitMiddleware(DB *gorm.DB) {
-	globalDB = DB
-}
-
-func RequireAuth() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Token not provided"})
-			return
-		}
-
-		// pastikan formatnya "Bearer <token>"
-		tokenParts := strings.Split(authHeader, " ")
-		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Invalid token format"})
-			return
-		}
-
-		tokenString := tokenParts[1]
-
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-			}
-			return []byte(os.Getenv("JWT_SECRET")), nil
-		})
-		if err != nil || !token.Valid {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Invalid token"})
-			return
-		}
-
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Invalid claims"})
-			return
-		}
-
-		if float64(time.Now().Unix()) > claims["exp"].(float64) {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: Token expired"})
-			return
-		}
-
-		userID := uint(claims["user_id"].(float64))
-		c.Set("user_id", userID)
-		c.Next()
+func RequireAuth(c *gin.Context) {
+	//GET COOKIE off req
+	tokenString, err := c.Cookie("Authorization")
+	if err != nil {
+		c.AbortWithStatus(http.StatusUnauthorized)
 	}
-}
 
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
+		return []byte(os.Getenv("SECRET")), nil
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
+	if err != nil {
+		log.Fatal(err)
 
-func RequireAuthorization(allowedRoles ...string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		userIDValue, exists := c.Get("user_id")
-		if !exists {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized: No user ID"})
-			return
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		if float64(time.Now().Unix()) > claims["exp"].(float64) {
+			c.AbortWithStatus(http.StatusUnauthorized)
 		}
 
-		userID := userIDValue.(uint)
-		userRepo := user.NewRepository(globalDB)
+		var user entities.User
+		migrations.GetDB().Find(&user, claims["sub"])
 
-		user, err := userRepo.FindByID(userID)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "User not found"})
-			return
+		if user.ID == 0 {
+			c.AbortWithStatus(http.StatusUnauthorized)
 		}
+		c.Set("user", user)
 
-		for _, role := range allowedRoles {
-			if user.Role == role {
-				c.Set("user", user)
-				c.Next()
-				return
-			}
-		}
-
-		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Forbidden: You don't have permission"})
+		c.Next()
+	} else {
+		c.AbortWithStatus(http.StatusUnauthorized)
 	}
 }
