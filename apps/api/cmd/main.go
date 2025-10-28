@@ -5,6 +5,7 @@ import (
 
 	"github.com/abrizamstore/database/migrations"
 	"github.com/abrizamstore/modules/auth"
+	"github.com/abrizamstore/modules/dashboard"
 	"github.com/abrizamstore/modules/kategori"
 	"github.com/abrizamstore/modules/pembelian"
 	"github.com/abrizamstore/modules/penjualan"
@@ -25,6 +26,7 @@ func main() {
 		kategori.KategoriRouter(api, DB)
 		penjualan.PenjualanRouter(api, DB)
 		pembelian.PembelianRouter(api, DB)
+		dashboard.DashboardRouter(api, DB)
 	}
 
 	port := os.Getenv("GOLANG_PORT")
