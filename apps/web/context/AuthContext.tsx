@@ -5,7 +5,6 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
 
-// Tipe data User, samakan dengan entities.User
 interface User {
   ID: number;
   Name: string;
