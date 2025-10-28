@@ -1,4 +1,4 @@
-package penjualan
+package pembelian
 
 import (
 	"net/http"
@@ -9,31 +9,29 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Handler interface {
-	CreatePenjualan(c *gin.Context)
-	GetAll(c *gin.Context)
-	GetByID(c *gin.Context)
-}
-
 type handler struct {
 	service Service
+}
+
+type Handler interface {
+	CreatePembelian(c *gin.Context)
+	GetAll(c *gin.Context)
+	GetByID(c *gin.Context)
 }
 
 func NewHandler(service Service) Handler {
 	return &handler{service: service}
 }
 
-func (h *handler) CreatePenjualan(c *gin.Context) {
-	var input dto.PenjualanCreate
-	
-	// Validasi input JSON
+func (h *handler) CreatePembelian(c *gin.Context) {
+	var input dto.PembelianCreate
+
 	if err := c.ShouldBindJSON(&input); err != nil {
 		res := utils.BuildResponseFailed("Input tidak valid", err.Error(), utils.EmptyObj{})
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	// Ambil user dari context (yang di-set oleh middleware RequireAuth)
 	user, exists := c.Get("user")
 	if !exists {
 		res := utils.BuildResponseFailed("Otentikasi gagal", "User tidak ditemukan di context", utils.EmptyObj{})
@@ -42,16 +40,14 @@ func (h *handler) CreatePenjualan(c *gin.Context) {
 	}
 	userID := user.(entities.User).ID
 
-	// Panggil service
-	penjualan, err := h.service.CreatePenjualan(input, userID)
+	pembelian, err := h.service.CreatePembelian(input, userID)
 	if err != nil {
-		// Error dari service (misal: "stok tidak cukup")
-		res := utils.BuildResponseFailed("Gagal membuat transaksi", err.Error(), utils.EmptyObj{})
+		res := utils.BuildResponseFailed("Gagal mencatat pembelian", err.Error(), utils.EmptyObj{})
 		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	res := utils.BuildResponseSuccess("Transaksi berhasil dibuat", penjualan)
+	res := utils.BuildResponseSuccess("Pembelian (restock) berhasil dicatat", pembelian)
 	c.JSON(http.StatusCreated, res)
 }
 
@@ -73,18 +69,18 @@ func (h *handler) GetAll(c *gin.Context) {
 		return
 	}
 
-	penjualans, total, err := h.service.GetAll(limit, offset)
+	pembelians, total, err := h.service.GetAll(limit, offset)
 	if err != nil {
-		res := utils.BuildResponseFailed("Failed to retrieve sales history", err.Error(), utils.EmptyObj{})
+		res := utils.BuildResponseFailed("Failed to retrieve purchase history", err.Error(), utils.EmptyObj{})
 		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
 	data := gin.H{
-		"penjualans": penjualans,
+		"pembelians": pembelians,
 		"total":      total,
 	}
-	res := utils.BuildResponseSuccess("Sales history retrieved successfully", data)
+	res := utils.BuildResponseSuccess("Purchase history retrieved successfully", data)
 	c.JSON(http.StatusOK, res)
 }
 
@@ -97,13 +93,13 @@ func (h *handler) GetByID(c *gin.Context) {
 		return
 	}
 
-	penjualan, err := h.service.GetByID(uint(id))
+	pembelian, err := h.service.GetByID(uint(id))
 	if err != nil {
-		res := utils.BuildResponseFailed("Failed to retrieve sale detail", err.Error(), utils.EmptyObj{})
+		res := utils.BuildResponseFailed("Failed to retrieve purchase detail", err.Error(), utils.EmptyObj{})
 		c.JSON(http.StatusInternalServerError, res)
 		return
 	}
 
-	res := utils.BuildResponseSuccess("Sale detail retrieved successfully", penjualan)
+	res := utils.BuildResponseSuccess("Purchase detail retrieved successfully", pembelian)
 	c.JSON(http.StatusOK, res)
 }

@@ -10,6 +10,8 @@ import (
 
 type Service interface {
 	CreatePenjualan(input dto.PenjualanCreate, userID uint) (*entities.Penjualan, error)
+	GetAll(limit int, offset int) ([]entities.Penjualan, int64, error)
+	GetByID(ID uint) (*entities.Penjualan, error)
 }
 
 type service struct {
@@ -80,4 +82,12 @@ func (s *service) CreatePenjualan(input dto.PenjualanCreate, userID uint) (*enti
 	}
 
 	return &penjualan, nil
+}
+
+func (s *service) GetAll(limit int, offset int) ([]entities.Penjualan, int64, error) {
+	return s.repository.FindAll(limit, offset)
+}
+
+func (s *service) GetByID(ID uint) (*entities.Penjualan, error) {
+	return s.repository.FindByID(ID)
 }
