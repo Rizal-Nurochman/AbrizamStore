@@ -14,6 +14,7 @@ type Service interface {
 	GetAll(limit int, offset int) ([]entities.Produk, int64, error)
 	GetByID(ID uint) (*entities.Produk, error)
 	GetByName(name string, limit int, offset int) (*[]entities.Produk, int64, error)
+	GetLowStock() ([]entities.Produk, int64, error)
 	Update(ID uint, produk dto.ProdukCreate) (*entities.Produk, error)
 	Delete(ID uint) error
 }
@@ -98,4 +99,14 @@ func (s *service) Delete(ID uint) error {
 	}
 
 	return nil
+}
+
+func (s *service) GetLowStock() ([]entities.Produk, int64, error) {
+	stokThreshold := 10
+	
+	produks, total, err := s.repository.FindLowStock(stokThreshold)
+	if err != nil {
+		return nil, 0, err
+	}
+	return produks, total, nil
 }

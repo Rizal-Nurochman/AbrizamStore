@@ -15,6 +15,7 @@ func ProdukRouter(api *gin.RouterGroup, DB *gorm.DB) {
 	{
 		public.GET("/", produkHandler.GetAll)
 		public.GET("/:id", produkHandler.GetByID)
+		public.GET("/low-stock", produkHandler.GetLowStock)
 	}
 
 	protected := api.Group("/products")

@@ -1,6 +1,7 @@
 package products
 
 import (
+	"github.com/abrizamstore/database/entities"
 	"github.com/abrizamstore/package/dto"
 	"github.com/abrizamstore/package/utils"
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,7 @@ type Handler interface {
 	GetAll(c *gin.Context)
 	GetByID(c *gin.Context)
 	GetByName(c *gin.Context)
+	GetLowStock(c *gin.Context)
 	Update(c *gin.Context)
 	Delete(c *gin.Context)
 }
@@ -45,6 +47,7 @@ func (h *handler) Create(c *gin.Context) {
 func (h *handler) GetAll(c *gin.Context) {
 	limitStr := c.DefaultQuery("limit", "10")
 	offsetStr := c.DefaultQuery("offset", "0")
+	searchName := c.Query("nama_produk")
 
 	limit, err := utils.StringToInt(limitStr)
 	if err != nil {
@@ -60,9 +63,24 @@ func (h *handler) GetAll(c *gin.Context) {
 		return
 	}
 
-	produks, total, err := h.service.GetAll(limit, offset)
-	if err != nil {
-		res := utils.BuildResponseFailed("Failed to retrieve produks", err.Error(), utils.EmptyObj{})
+	var produks []entities.Produk
+	var total int64
+	var errService error
+
+	if searchName != "" {
+		var produksPtr *[]entities.Produk
+		produksPtr, total, errService = h.service.GetByName(searchName, limit, offset)
+		if errService == nil {
+			// 2. Dereference pointer untuk mengisi variabel produks
+			produks = *produksPtr
+		}
+
+	} else {
+		produks, total, errService = h.service.GetAll(limit, offset)
+	}
+
+	if errService != nil {
+		res := utils.BuildResponseFailed("Failed to retrieve produks", errService.Error(), utils.EmptyObj{})
 		c.JSON(500, res)
 		return
 	}
@@ -182,5 +200,22 @@ func (h *handler) Delete(c *gin.Context) {
 	}
 
 	res := utils.BuildResponseSuccess("Produk deleted successfully", utils.EmptyObj{})
+	c.JSON(200, res)
+}
+
+func (h *handler) GetLowStock(c *gin.Context) {
+	produks, total, err := h.service.GetLowStock()
+	if err != nil {
+		res := utils.BuildResponseFailed("Failed to retrieve low stock produks", err.Error(), utils.EmptyObj{})
+		c.JSON(500, res)
+		return
+	}
+
+	data := gin.H{
+		"produks": produks,
+		"total":   total,
+	}
+
+	res := utils.BuildResponseSuccess("Low stock produks retrieved successfully", data)
 	c.JSON(200, res)
 }

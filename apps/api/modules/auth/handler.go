@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"net/http"
+
 	"github.com/abrizamstore/package/dto"
 	"github.com/abrizamstore/package/utils"
 	"github.com/gin-gonic/gin"
@@ -13,6 +15,7 @@ type handler struct {
 type Handler interface {
 	Register(c *gin.Context)
 	Login(c *gin.Context)
+	Logout(c *gin.Context)
 }
 
 func NewHandler(service Service) Handler {
@@ -56,11 +59,34 @@ func (h *handler) Login(c *gin.Context) {
 		return
 	}
 
+	c.SetCookie(
+		"Authorization", // Nama yang sama dengan yang dibaca middleware
+		token,           // Token dari service
+		3600*12,         // 12 jam
+		"/",             // Path
+		"localhost",     // Domain
+		false,           // Secure
+		true,            // HttpOnly
+	)
+
 	data := gin.H{
 		"user":  user,
 		"token": token,
 	}
 
 	res := utils.BuildResponseSuccess("Berhasil melakukan login", data)
+	c.JSON(200, res)
+}
+
+func (h *handler) Logout(c *gin.Context) {
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "Authorization",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+	})
+
+	res := utils.BuildResponseSuccess("Berhasil melakukan logout", utils.EmptyObj{})
 	c.JSON(200, res)
 }

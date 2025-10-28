@@ -20,6 +20,7 @@ type service struct {
 type Service interface {
 	Register(input dto.UserRegister) (*entities.User, error)
 	Login(input dto.UserLogin) (*entities.User, string, error)
+	Logout() (string, error)
 }
 
 func NewService(repository user.Repository) Service {
@@ -89,4 +90,9 @@ func (s *service) Login(input dto.UserLogin) (*entities.User, string, error) {
 	}
 
 	return findUser, token, nil
+}
+
+func (s *service) Logout() (string, error) {
+	expiredToken := ""
+	return expiredToken, nil
 }

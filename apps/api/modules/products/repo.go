@@ -14,6 +14,7 @@ type Repository interface {
 	FindAll(limit int, offset int) ([]entities.Produk, int64, error)
 	FindByID(ID uint) (*entities.Produk, error)
 	FindByName(name string, limit int, offset int) (*[]entities.Produk, int64, error)
+	FindLowStock(stokThreshold int) ([]entities.Produk, int64, error)
 	Update(ID uint, produk entities.Produk) (*entities.Produk, error)
 	Delete(ID uint) (error)
 }
@@ -87,4 +88,22 @@ func (r *repository) Delete(ID uint) (error) {
 	}
 
 	return nil
+}
+
+func (r *repository) FindLowStock(stokThreshold int) ([]entities.Produk, int64, error) {
+	var produks []entities.Produk
+	var total int64
+
+	query := r.db.Model(&entities.Produk{}).
+		Preload("Kategori").
+		Where("stok <= ?", stokThreshold)
+
+	query.Count(&total)
+
+	err := query.Order("stok asc").Find(&produks).Error 
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return produks, total, nil
 }
