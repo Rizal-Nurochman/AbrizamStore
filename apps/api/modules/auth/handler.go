@@ -16,6 +16,8 @@ type Handler interface {
 	Register(c *gin.Context)
 	Login(c *gin.Context)
 	Logout(c *gin.Context)
+	VerifyEmail(c *gin.Context)
+	GoogleLogin(c *gin.Context)
 }
 
 func NewHandler(service Service) Handler {
@@ -88,5 +90,56 @@ func (h *handler) Logout(c *gin.Context) {
 	})
 
 	res := utils.BuildResponseSuccess("Berhasil melakukan logout", utils.EmptyObj{})
+	c.JSON(200, res)
+}
+
+func (h *handler) VerifyEmail(c *gin.Context) {
+	var input struct {
+		Email string `json:"email" binding:"required,email"`
+		Code  string `json:"code" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		res := utils.BuildResponseFailed("Gagal verifikasi email", err.Error(), utils.EmptyObj{})
+		c.JSON(400, res)
+		return
+	}
+
+	err := h.service.VerifyEmail(input.Email, input.Code)
+	if err != nil {
+		res := utils.BuildResponseFailed("Gagal verifikasi email", err.Error(), utils.EmptyObj{})
+		c.JSON(400, res)
+		return
+	}
+
+	res := utils.BuildResponseSuccess("Email berhasil diverifikasi", utils.EmptyObj{})
+	c.JSON(200, res)
+}
+
+func (h *handler) GoogleLogin(c *gin.Context) {
+	var input struct {
+		Email string `json:"email" binding:"required,email"`
+		Name  string `json:"name" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		res := utils.BuildResponseFailed("Gagal login Google", err.Error(), utils.EmptyObj{})
+		c.JSON(400, res)
+		return
+	}
+
+	user, token, err := h.service.GoogleLogin(input.Email, input.Name)
+	if err != nil {
+		res := utils.BuildResponseFailed("Gagal login Google", err.Error(), utils.EmptyObj{})
+		c.JSON(400, res)
+		return
+	}
+
+	data := gin.H{
+		"user":  user,
+		"token": token,
+	}
+
+	res := utils.BuildResponseSuccess("Berhasil login Google", data)
 	c.JSON(200, res)
 }
