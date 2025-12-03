@@ -1,7 +1,10 @@
 package auth
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
+	"net/http"
 	"os"
 	"time"
 
@@ -23,7 +26,7 @@ type Service interface {
 	Login(input dto.UserLogin) (*entities.User, string, error)
 	Logout() (string, error)
 	VerifyEmail(email string, code string) error
-	GoogleLogin(email string, name string) (*entities.User, string, error)
+	GoogleLogin(code string) (*entities.User, string, error)
 }
 
 func NewService(repository user.Repository) Service {
@@ -127,8 +130,54 @@ func (s *service) VerifyEmail(email string, code string) error {
 	return nil
 }
 
-func (s *service) GoogleLogin(email string, name string) (*entities.User, string, error) {
-	user, err := s.repository.FindByEmail(email)
+func (s *service) GoogleLogin(code string) (*entities.User, string, error) {
+	// Exchange code for token
+	tokenReqBody := map[string]string{
+		"code":          code,
+		"client_id":     os.Getenv("GOOGLE_CLIENT_ID"),
+		"client_secret": os.Getenv("GOOGLE_CLIENT_SECRET"),
+		"redirect_uri":  "postmessage", // Important for react-oauth/google
+		"grant_type":    "authorization_code",
+	}
+	jsonReq, _ := json.Marshal(tokenReqBody)
+
+	resp, err := http.Post("https://oauth2.googleapis.com/token", "application/json", bytes.NewBuffer(jsonReq))
+	if err != nil {
+		return nil, "", errors.New("gagal menukar kode dengan Google")
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var errResp map[string]interface{}
+		json.NewDecoder(resp.Body).Decode(&errResp)
+		return nil, "", errors.New("kode Google tidak valid")
+	}
+
+	var tokenResp struct {
+		AccessToken string `json:"access_token"`
+		IdToken     string `json:"id_token"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
+		return nil, "", errors.New("gagal memproses token dari Google")
+	}
+
+	// Fetch user info using access token
+	userInfoResp, err := http.Get("https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + tokenResp.AccessToken)
+	if err != nil {
+		return nil, "", errors.New("gagal mengambil info user dari Google")
+	}
+	defer userInfoResp.Body.Close()
+
+	var googleUser struct {
+		Email string `json:"email"`
+		Name  string `json:"name"`
+	}
+
+	if err := json.NewDecoder(userInfoResp.Body).Decode(&googleUser); err != nil {
+		return nil, "", errors.New("gagal memproses info user dari Google")
+	}
+
+	user, err := s.repository.FindByEmail(googleUser.Email)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, "", err
 	}
@@ -136,8 +185,8 @@ func (s *service) GoogleLogin(email string, name string) (*entities.User, string
 	if user == nil {
 		// Register new user
 		newUser := &entities.User{
-			Name:       name,
-			Email:      email,
+			Name:       googleUser.Name,
+			Email:      googleUser.Email,
 			Role:       "user",
 			IsVerified: true, // Google users are verified
 		}
@@ -147,10 +196,10 @@ func (s *service) GoogleLogin(email string, name string) (*entities.User, string
 		}
 	}
 
-	token, err := s.generateTokenJWT(user.ID)
+	jwtToken, err := s.generateTokenJWT(user.ID)
 	if err != nil {
 		return nil, "", err
 	}
 
-	return user, token, nil
+	return user, jwtToken, nil
 }

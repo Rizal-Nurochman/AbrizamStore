@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 
 	"github.com/abrizamstore/database/migrations"
@@ -13,9 +14,17 @@ import (
 	"github.com/abrizamstore/modules/user"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	if err := godotenv.Load("../.env"); err != nil {
+		// Fallback to current directory if ../.env fails (e.g. running from root)
+		if err := godotenv.Load(); err != nil {
+			log.Println("No .env file found")
+		}
+	}
+
 	migrations.ConnectionDatabase()
 	DB := migrations.GetDB()
 

@@ -118,8 +118,7 @@ func (h *handler) VerifyEmail(c *gin.Context) {
 
 func (h *handler) GoogleLogin(c *gin.Context) {
 	var input struct {
-		Email string `json:"email" binding:"required,email"`
-		Name  string `json:"name" binding:"required"`
+		Code string `json:"code" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -128,7 +127,7 @@ func (h *handler) GoogleLogin(c *gin.Context) {
 		return
 	}
 
-	user, token, err := h.service.GoogleLogin(input.Email, input.Name)
+	user, token, err := h.service.GoogleLogin(input.Code)
 	if err != nil {
 		res := utils.BuildResponseFailed("Gagal login Google", err.Error(), utils.EmptyObj{})
 		c.JSON(400, res)
