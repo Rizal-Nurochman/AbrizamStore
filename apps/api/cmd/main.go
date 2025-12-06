@@ -19,7 +19,6 @@ import (
 
 func main() {
 	if err := godotenv.Load("../.env"); err != nil {
-		// Fallback to current directory if ../.env fails (e.g. running from root)
 		if err := godotenv.Load(); err != nil {
 			log.Println("No .env file found")
 		}
@@ -31,10 +30,10 @@ func main() {
 	router := gin.Default()
 
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:3000", "http://localhost:5173"} // Ganti dengan port FE Anda
+	config.AllowOrigins = []string{"http://localhost:3000", "http://localhost:5173"}
 	config.AllowCredentials = true
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
-	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept"}
+	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"}
 
 	router.Use(cors.New(config))
 

@@ -17,7 +17,8 @@ type Handler interface {
 	Login(c *gin.Context)
 	Logout(c *gin.Context)
 	VerifyEmail(c *gin.Context)
-	GoogleLogin(c *gin.Context)
+	ForgotPassword(c *gin.Context)
+	ResetPassword(c *gin.Context)
 }
 
 func NewHandler(service Service) Handler {
@@ -116,29 +117,40 @@ func (h *handler) VerifyEmail(c *gin.Context) {
 	c.JSON(200, res)
 }
 
-func (h *handler) GoogleLogin(c *gin.Context) {
-	var input struct {
-		Code string `json:"code" binding:"required"`
-	}
-
+func (h *handler) ForgotPassword(c *gin.Context) {
+	var input dto.ForgotPasswordInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		res := utils.BuildResponseFailed("Gagal login Google", err.Error(), utils.EmptyObj{})
+		res := utils.BuildResponseFailed("Input tidak valid", err.Error(), utils.EmptyObj{})
 		c.JSON(400, res)
 		return
 	}
 
-	user, token, err := h.service.GoogleLogin(input.Code)
+	err := h.service.ForgotPassword(input)
 	if err != nil {
-		res := utils.BuildResponseFailed("Gagal login Google", err.Error(), utils.EmptyObj{})
+		res := utils.BuildResponseFailed("Gagal mengirim kode reset password", err.Error(), utils.EmptyObj{})
 		c.JSON(400, res)
 		return
 	}
 
-	data := gin.H{
-		"user":  user,
-		"token": token,
+	res := utils.BuildResponseSuccess("Kode reset password telah dikirim ke email Anda", utils.EmptyObj{})
+	c.JSON(200, res)
+}
+
+func (h *handler) ResetPassword(c *gin.Context) {
+	var input dto.ResetPasswordInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		res := utils.BuildResponseFailed("Input tidak valid", err.Error(), utils.EmptyObj{})
+		c.JSON(400, res)
+		return
 	}
 
-	res := utils.BuildResponseSuccess("Berhasil login Google", data)
+	err := h.service.ResetPassword(input)
+	if err != nil {
+		res := utils.BuildResponseFailed("Gagal mereset password", err.Error(), utils.EmptyObj{})
+		c.JSON(400, res)
+		return
+	}
+
+	res := utils.BuildResponseSuccess("Password berhasil direset, silakan login kembali", utils.EmptyObj{})
 	c.JSON(200, res)
 }

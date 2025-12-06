@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"math/rand"
 	"os"
 	"strconv"
 
@@ -29,4 +30,9 @@ func SendEmail(to string, subject string, body string) error {
 	}
 
 	return nil
+}
+
+func GenerateVerificationCode() string {
+	code := rand.Intn(999999-100000) + 100000
+	return strconv.Itoa(code)
 }

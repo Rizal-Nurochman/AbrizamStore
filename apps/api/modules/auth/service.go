@@ -1,10 +1,7 @@
 package auth
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
-	"net/http"
 	"os"
 	"time"
 
@@ -26,7 +23,8 @@ type Service interface {
 	Login(input dto.UserLogin) (*entities.User, string, error)
 	Logout() (string, error)
 	VerifyEmail(email string, code string) error
-	GoogleLogin(code string) (*entities.User, string, error)
+	ForgotPassword(input dto.ForgotPasswordInput) error
+	ResetPassword(input dto.ResetPasswordInput) error
 }
 
 func NewService(repository user.Repository) Service {
@@ -60,8 +58,7 @@ func (s *service) Register(user dto.UserRegister) (*entities.User, error) {
 		return nil, err
 	}
 
-	// Generate verification code (simple implementation)
-	verificationCode := "123456" // In production use crypto/rand
+	verificationCode := utils.GenerateVerificationCode()
 
 	userInput := &entities.User{
 		Name:             user.Name,
@@ -76,7 +73,6 @@ func (s *service) Register(user dto.UserRegister) (*entities.User, error) {
 		return nil, err
 	}
 
-	// Send verification email
 	go utils.SendEmail(newUser.Email, "Verifikasi Email", "Kode verifikasi Anda: "+verificationCode)
 
 	return newUser, err
@@ -130,76 +126,55 @@ func (s *service) VerifyEmail(email string, code string) error {
 	return nil
 }
 
-func (s *service) GoogleLogin(code string) (*entities.User, string, error) {
-	// Exchange code for token
-	tokenReqBody := map[string]string{
-		"code":          code,
-		"client_id":     os.Getenv("GOOGLE_CLIENT_ID"),
-		"client_secret": os.Getenv("GOOGLE_CLIENT_SECRET"),
-		"redirect_uri":  "postmessage", // Important for react-oauth/google
-		"grant_type":    "authorization_code",
-	}
-	jsonReq, _ := json.Marshal(tokenReqBody)
-
-	resp, err := http.Post("https://oauth2.googleapis.com/token", "application/json", bytes.NewBuffer(jsonReq))
+func (s *service) ForgotPassword(input dto.ForgotPasswordInput) error {
+	user, err := s.repository.FindByEmail(input.Email)
 	if err != nil {
-		return nil, "", errors.New("gagal menukar kode dengan Google")
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		var errResp map[string]interface{}
-		json.NewDecoder(resp.Body).Decode(&errResp)
-		return nil, "", errors.New("kode Google tidak valid")
+		// Return nil to avoid enumerating users, or return error if strict
+		// For security, best practice is to say "If email exists, code sent"
+		// But for this stage, I'll return error if DB fails, or nil if not found (silent) or specific error.
+		// The repo returns error if not found? Let's check repo.
+		// Repo uses first(), returns error if not found.
+		return errors.New("email tidak ditemukan")
 	}
 
-	var tokenResp struct {
-		AccessToken string `json:"access_token"`
-		IdToken     string `json:"id_token"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
-		return nil, "", errors.New("gagal memproses token dari Google")
-	}
+	code := utils.GenerateVerificationCode()
+	user.ResetPasswordToken = code
+	user.ResetPasswordExpiry = time.Now().Add(15 * time.Minute) // 15 minutes expiry
 
-	// Fetch user info using access token
-	userInfoResp, err := http.Get("https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + tokenResp.AccessToken)
+	_, err = s.repository.Update(user)
 	if err != nil {
-		return nil, "", errors.New("gagal mengambil info user dari Google")
-	}
-	defer userInfoResp.Body.Close()
-
-	var googleUser struct {
-		Email string `json:"email"`
-		Name  string `json:"name"`
+		return err
 	}
 
-	if err := json.NewDecoder(userInfoResp.Body).Decode(&googleUser); err != nil {
-		return nil, "", errors.New("gagal memproses info user dari Google")
-	}
+	// Send Email
+	go utils.SendEmail(user.Email, "Reset Password", "Kode reset password Anda: "+code)
 
-	user, err := s.repository.FindByEmail(googleUser.Email)
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, "", err
-	}
+	return nil
+}
 
-	if user == nil {
-		// Register new user
-		newUser := &entities.User{
-			Name:       googleUser.Name,
-			Email:      googleUser.Email,
-			Role:       "user",
-			IsVerified: true, // Google users are verified
-		}
-		user, err = s.repository.Create(newUser)
-		if err != nil {
-			return nil, "", err
-		}
-	}
-
-	jwtToken, err := s.generateTokenJWT(user.ID)
+func (s *service) ResetPassword(input dto.ResetPasswordInput) error {
+	user, err := s.repository.FindByToken(input.Token)
 	if err != nil {
-		return nil, "", err
+		return errors.New("token invalid atau kadaluarsa")
 	}
 
-	return user, jwtToken, nil
+	if time.Now().After(user.ResetPasswordExpiry) {
+		return errors.New("token kadaluarsa")
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(input.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	user.Password = string(passwordHash)
+	user.ResetPasswordToken = ""
+	user.ResetPasswordExpiry = time.Time{} // Clear expiry
+
+	_, err = s.repository.Update(user)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

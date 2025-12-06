@@ -169,6 +169,14 @@ export default function LoginPage() {
               <p className="text-sm text-red-500">{form.formState.errors.password.message}</p>
             )}
           </div>
+          <div className="flex justify-end">
+            <Link
+              href="/forgot-password"
+              className="text-sm font-medium text-indigo-600 hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <Button className="w-full" type="submit" isLoading={loginMutation.isPending}>
             Sign In
           </Button>

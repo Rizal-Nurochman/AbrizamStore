@@ -1,16 +1,22 @@
 package entities
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type User struct {
 	gorm.Model
-	Name             string `json:"name"`
-	Email            string `json:"email" gorm:"uniqueIndex"`
-	Password         string `json:"password"`
-	Role             string `json:"role" binding:"omitempty,oneof=admin user"`
-	ProfileImage     string `json:"profile_image" gorm:"omitempty"`
-	IsVerified       bool   `json:"is_verified" gorm:"default:false"`
-	VerificationCode string `json:"verification_code" gorm:"omitempty"`
+	Name                string    `json:"name"`
+	Email               string    `json:"email" gorm:"uniqueIndex"`
+	Password            string    `json:"password"`
+	Role                string    `json:"role" binding:"omitempty,oneof=admin user"`
+	ProfileImage        string    `json:"profile_image" gorm:"omitempty"`
+	IsVerified          bool      `json:"is_verified" gorm:"default:false"`
+	VerificationCode    string    `json:"verification_code" gorm:"omitempty"`
+	ResetPasswordToken  string    `json:"reset_password_token" gorm:"omitempty"`
+	ResetPasswordExpiry time.Time `json:"reset_password_expiry" gorm:"omitempty"`
 
 	Pembelian []Pembelian `gorm:"foreignKey:ID_User"`
 	Penjualan []Penjualan `gorm:"foreignKey:ID_User"`

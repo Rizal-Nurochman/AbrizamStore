@@ -46,12 +46,11 @@ func (s *service) UpdateProfile(userID uint, input dto.UserUpdate) (*entities.Us
 		}
 		user.Password = string(passwordHash)
 	}
-	// ProfileImage logic can be added here if needed, assuming it's just a string URL for now
 	if input.ProfileImage != "" {
 		user.ProfileImage = input.ProfileImage
 	}
 
-	updatedUser, err := s.repository.Create(user) // Repository Create usually acts as Save/Update in GORM if ID exists
+	updatedUser, err := s.repository.Create(user)
 	if err != nil {
 		return nil, err
 	}
