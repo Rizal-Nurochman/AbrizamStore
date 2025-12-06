@@ -11,6 +11,7 @@ import (
 	"github.com/abrizamstore/package/utils"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/api/oauth2/v2"
 	"gorm.io/gorm"
 )
 
@@ -22,6 +23,7 @@ type Service interface {
 	Register(input dto.UserRegister) (*entities.User, error)
 	Login(input dto.UserLogin) (*entities.User, string, error)
 	Logout() (string, error)
+	LoginOrRegisterWithGoogle(googleUserInfo *oauth2.Userinfo) (*entities.User, string, error)
 	VerifyEmail(email string, code string) error
 	ForgotPassword(input dto.ForgotPasswordInput) error
 	ResetPassword(input dto.ResetPasswordInput) error
@@ -129,24 +131,18 @@ func (s *service) VerifyEmail(email string, code string) error {
 func (s *service) ForgotPassword(input dto.ForgotPasswordInput) error {
 	user, err := s.repository.FindByEmail(input.Email)
 	if err != nil {
-		// Return nil to avoid enumerating users, or return error if strict
-		// For security, best practice is to say "If email exists, code sent"
-		// But for this stage, I'll return error if DB fails, or nil if not found (silent) or specific error.
-		// The repo returns error if not found? Let's check repo.
-		// Repo uses first(), returns error if not found.
 		return errors.New("email tidak ditemukan")
 	}
 
 	code := utils.GenerateVerificationCode()
 	user.ResetPasswordToken = code
-	user.ResetPasswordExpiry = time.Now().Add(15 * time.Minute) // 15 minutes expiry
+	user.ResetPasswordExpiry = time.Now().Add(15 * time.Minute)
 
 	_, err = s.repository.Update(user)
 	if err != nil {
 		return err
 	}
 
-	// Send Email
 	go utils.SendEmail(user.Email, "Reset Password", "Kode reset password Anda: "+code)
 
 	return nil
@@ -169,7 +165,7 @@ func (s *service) ResetPassword(input dto.ResetPasswordInput) error {
 
 	user.Password = string(passwordHash)
 	user.ResetPasswordToken = ""
-	user.ResetPasswordExpiry = time.Time{} // Clear expiry
+	user.ResetPasswordExpiry = time.Time{}
 
 	_, err = s.repository.Update(user)
 	if err != nil {
@@ -177,4 +173,27 @@ func (s *service) ResetPassword(input dto.ResetPasswordInput) error {
 	}
 
 	return nil
+}
+
+func (s *service) LoginOrRegisterWithGoogle(googleUserInfo *oauth2.Userinfo) (*entities.User, string, error) {
+	user, err := s.repository.FindByEmail(googleUserInfo.Email)
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		newUser := &entities.User{
+			Name:     googleUserInfo.Name,
+			Email:    googleUserInfo.Email,
+			Password: "",
+		}
+		createdUser, err := s.repository.Create(newUser)
+		if err != nil {
+			return nil, "", err
+		}
+		user = createdUser
+	} else if err != nil {
+		return nil, "", err
+	}
+	token, err := s.generateTokenJWT(user.ID)
+	if err != nil {
+		return nil, "", err
+	}
+	return user, token, nil
 }

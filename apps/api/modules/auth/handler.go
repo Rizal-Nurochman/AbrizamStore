@@ -1,28 +1,46 @@
 package auth
 
 import (
+	"context"
 	"net/http"
+	"os"
 
 	"github.com/abrizamstore/package/dto"
 	"github.com/abrizamstore/package/utils"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+	googleAPI "google.golang.org/api/oauth2/v2"
 )
 
 type handler struct {
-	service Service
+	service     Service
+	oauthConfig *oauth2.Config
 }
 
 type Handler interface {
 	Register(c *gin.Context)
 	Login(c *gin.Context)
 	Logout(c *gin.Context)
+	GoogleLoginHandler(c *gin.Context)
+	GoogleCallbackHandler(c *gin.Context)
 	VerifyEmail(c *gin.Context)
 	ForgotPassword(c *gin.Context)
 	ResetPassword(c *gin.Context)
 }
 
 func NewHandler(service Service) Handler {
-	return &handler{service}
+	config := &oauth2.Config{
+		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+		RedirectURL:  os.Getenv("GOOGLE_REDIRECT_URL"),
+		Scopes: []string{
+			"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.profile",
+		},
+		Endpoint: google.Endpoint,
+	}
+	return &handler{service, config}
 }
 
 func (h *handler) Register(c *gin.Context) {
@@ -92,6 +110,114 @@ func (h *handler) Logout(c *gin.Context) {
 
 	res := utils.BuildResponseSuccess("Berhasil melakukan logout", utils.EmptyObj{})
 	c.JSON(200, res)
+}
+
+func (h *handler) GoogleLoginHandler(c *gin.Context) {
+	var input struct {
+		Code string `json:"code" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&input); err != nil {
+		res := utils.BuildResponseFailed("Authorization code not provided", err.Error(), utils.EmptyObj{})
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	token, err := h.oauthConfig.Exchange(context.Background(), input.Code)
+	if err != nil {
+		res := utils.BuildResponseFailed("Failed to exchange code", err.Error(), utils.EmptyObj{})
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+	client := h.oauthConfig.Client(context.Background(), token)
+	service, err := googleAPI.New(client)
+	if err != nil {
+		res := utils.BuildResponseFailed("Failed to create Google client", err.Error(), utils.EmptyObj{})
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+	userInfo, err := service.Userinfo.Get().Do()
+	if err != nil {
+		res := utils.BuildResponseFailed("Failed to get user info", err.Error(), utils.EmptyObj{})
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+	user, appToken, err := h.service.LoginOrRegisterWithGoogle(userInfo)
+	if err != nil {
+		res := utils.BuildResponseFailed("Failed to login or register with Google", err.Error(), utils.EmptyObj{})
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	c.SetCookie(
+		"Authorization", // Match standard auth cookie name
+		appToken,
+		3600*12, // 12 hours
+		"/",
+		"localhost",
+		false, // Set to true in production
+		true,
+	)
+
+	data := gin.H{
+		"user":  user,
+		"token": appToken,
+	}
+
+	res := utils.BuildResponseSuccess("Successfully logged in with Google", data)
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *handler) GoogleCallbackHandler(c *gin.Context) {
+	// Kept for backward compatibility or if GET method is used
+	code := c.Query("code")
+	if code == "" {
+		res := utils.BuildResponseFailed("Authorization code not provided", "code is empty", utils.EmptyObj{})
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+	token, err := h.oauthConfig.Exchange(context.Background(), code)
+	if err != nil {
+		res := utils.BuildResponseFailed("Failed to exchange code", err.Error(), utils.EmptyObj{})
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+	client := h.oauthConfig.Client(context.Background(), token)
+	service, err := googleAPI.New(client)
+	if err != nil {
+		res := utils.BuildResponseFailed("Failed to create Google client", err.Error(), utils.EmptyObj{})
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+	userInfo, err := service.Userinfo.Get().Do()
+	if err != nil {
+		res := utils.BuildResponseFailed("Failed to get user info", err.Error(), utils.EmptyObj{})
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+	user, appToken, err := h.service.LoginOrRegisterWithGoogle(userInfo)
+	if err != nil {
+		res := utils.BuildResponseFailed("Failed to login or register with Google", err.Error(), utils.EmptyObj{})
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	c.SetCookie(
+		"Authorization", // Match standard auth cookie name
+		appToken,
+		3600*12, // 12 hours
+		"/",
+		"localhost",
+		false, // Set to true in production
+		true,
+	)
+
+	data := gin.H{
+		"user":  user,
+		"token": appToken,
+	}
+
+	res := utils.BuildResponseSuccess("Successfully logged in with Google", data)
+	c.JSON(http.StatusOK, res)
 }
 
 func (h *handler) VerifyEmail(c *gin.Context) {
