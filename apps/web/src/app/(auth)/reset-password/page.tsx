@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Eye, EyeOff, Lock, Key, ArrowLeft } from "lucide-react";
@@ -36,18 +36,35 @@ const resetPasswordSchema = z
 
 type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 
-export default function ResetPasswordPage() {
+// Separate component that uses search params
+function ResetPasswordContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tokenFromUrl = searchParams.get("token") || "";
   const [showPassword, setShowPassword] = useState(false);
+
+  // Effect to validate token presence
+  useEffect(() => {
+    if (!tokenFromUrl) {
+      toast.error("Invalid or missing reset token");
+    }
+  }, [tokenFromUrl]);
 
   const form = useForm<ResetPasswordValues>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
-      token: "",
+      token: tokenFromUrl,
       new_password: "",
       confirm_password: "",
     },
   });
+
+  // Update form value if token comes in late
+  useEffect(() => {
+    if (tokenFromUrl) {
+      form.setValue("token", tokenFromUrl);
+    }
+  }, [tokenFromUrl, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: ResetPasswordValues) => {
@@ -76,29 +93,13 @@ export default function ResetPasswordPage() {
           Reset Password
         </CardTitle>
         <CardDescription className="text-center">
-          Enter your verification code and new password
+          Enter your new password
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="token">Verification Code</Label>
-            <div className="relative">
-              <Key className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-              <Input
-                id="token"
-                placeholder="Enter code from email"
-                className="pl-10"
-                {...form.register("token")}
-                disabled={mutation.isPending}
-              />
-            </div>
-            {form.formState.errors.token && (
-              <p className="text-sm text-red-500">
-                {form.formState.errors.token.message}
-              </p>
-            )}
-          </div>
+          {/* Hidden token field */}
+          <input type="hidden" {...form.register("token")} />
 
           <div className="space-y-2">
             <Label htmlFor="new_password">New Password</Label>
@@ -168,5 +169,14 @@ export default function ResetPasswordPage() {
         </Link>
       </CardFooter>
     </Card>
+  );
+}
+
+// Main page component wrapped in Suspense
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

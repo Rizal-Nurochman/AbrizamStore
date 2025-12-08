@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
       return response.data;
     },
     onSuccess: (data) => {
-      toast.success(data.message || "Verification code sent to your email");
+      toast.success(data.message || "Reset link sent to your email");
     },
     onError: (error: unknown) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
           Forgot Password
         </CardTitle>
         <CardDescription className="text-center">
-          Enter your email to receive a password reset code
+          Enter your email to receive a password reset link
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -90,7 +90,7 @@ export default function ForgotPasswordPage() {
             type="submit"
             isLoading={mutation.isPending}
           >
-            Send Reset Code
+            Send Reset Link
           </Button>
         </form>
       </CardContent>

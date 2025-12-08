@@ -201,7 +201,14 @@ func (s *service) ForgotPassword(input dto.ForgotPasswordInput) error {
 		return err
 	}
 
-	go utils.SendEmail(user.Email, "Reset Password", "Kode reset password Anda: "+code)
+	// Construct reset link - using localhost:3000 as default or env variable
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:3000"
+	}
+	resetLink := frontendURL + "/reset-password?token=" + code
+
+	go utils.SendEmail(user.Email, "Reset Password", "Klik link berikut untuk mereset password Anda: "+resetLink)
 
 	return nil
 }
