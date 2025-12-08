@@ -78,7 +78,8 @@ func (s *service) Register(user dto.UserRegister) (*entities.User, error) {
 	}
 
 	go func() {
-		err := utils.SendEmail(newUser.Email, "Verifikasi Email", "Kode verifikasi Anda: "+verificationCode)
+		emailBody := utils.GetVerificationEmailTemplate(verificationCode)
+		err := utils.SendEmail(newUser.Email, "Kode Verifikasi Akun Anda", emailBody)
 		if err != nil {
 			// Log the error using standard log package or just print it for now if no logger is set up
 			// Assuming standard log package usage is acceptable
@@ -131,11 +132,11 @@ func (s *service) VerifyEmail(email string, code string) error {
 	}
 
 	if user.VerificationCode != code {
-		return errors.New("kode verifikasi salah")
+		return errors.New("Kode verifikasi salah.")
 	}
 
 	if time.Now().After(user.VerificationCodeExpiry) {
-		return errors.New("kode verifikasi kadaluarsa, silakan kirim ulang kode")
+		return errors.New("Kode verifikasi sudah kadaluarsa.")
 	}
 
 	user.IsVerified = true
@@ -151,11 +152,16 @@ func (s *service) VerifyEmail(email string, code string) error {
 func (s *service) ResendVerificationCode(email string) error {
 	user, err := s.repository.FindByEmail(email)
 	if err != nil {
-		return errors.New("akun tidak ditemukan")
+		return errors.New("Email tidak ditemukan.")
 	}
 
 	if user.IsVerified {
-		return errors.New("akun sudah diverifikasi")
+		return errors.New("Akun sudah diverifikasi.")
+	}
+
+	// Strict cooldown check: if current code is still valid (expiry in future), deny resend
+	if time.Now().Before(user.VerificationCodeExpiry) {
+		return errors.New("Tunggu 5 menit sebelum meminta kode lagi.")
 	}
 
 	code := utils.GenerateVerificationCode()
@@ -168,7 +174,8 @@ func (s *service) ResendVerificationCode(email string) error {
 	}
 
 	go func() {
-		err := utils.SendEmail(user.Email, "Verifikasi Email (Kirim Ulang)", "Kode verifikasi baru Anda: "+code)
+		emailBody := utils.GetVerificationEmailTemplate(code)
+		err := utils.SendEmail(user.Email, "Kode Verifikasi Akun Anda (Kirim Ulang)", emailBody)
 		if err != nil {
 			println("Failed to send verification email:", err.Error())
 		} else {
