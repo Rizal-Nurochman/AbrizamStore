@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -63,8 +63,9 @@ function VerifyEmailContent() {
         router.push("/login");
       }, 1500);
     },
-    onError: (error: any) => {
-      const message = error.response?.data?.message || "Verification failed";
+    onError: (error: unknown) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const message = (error as any).response?.data?.message || "Verification failed";
       toast.error(message);
     },
   });
@@ -77,8 +78,9 @@ function VerifyEmailContent() {
     onSuccess: () => {
       toast.success("Verification code resent! Please check your email.");
     },
-    onError: (error: any) => {
-      const message = error.response?.data?.message || "Failed to resend code";
+    onError: (error: unknown) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const message = (error as any).response?.data?.message || "Failed to resend code";
       toast.error(message);
     },
   });

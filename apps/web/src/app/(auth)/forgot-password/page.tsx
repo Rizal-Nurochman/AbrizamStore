@@ -43,8 +43,9 @@ export default function ForgotPasswordPage() {
     onSuccess: (data) => {
       toast.success(data.message || "Verification code sent to your email");
     },
-    onError: (error: Error | any) => {
-      const message = error.response?.data?.message || "Something went wrong";
+    onError: (error: unknown) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const message = (error as any).response?.data?.message || "Something went wrong";
       toast.error(message);
     },
   });

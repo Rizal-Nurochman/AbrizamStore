@@ -58,8 +58,9 @@ export default function ResetPasswordPage() {
       toast.success(data.message || "Password reset successfully");
       router.push("/login");
     },
-    onError: (error: Error | any) => {
-      const message = error.response?.data?.message || "Something went wrong";
+    onError: (error: unknown) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const message = (error as any).response?.data?.message || "Something went wrong";
       toast.error(message);
     },
   });
