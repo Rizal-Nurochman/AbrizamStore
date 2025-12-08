@@ -58,9 +58,15 @@ export default function LoginPage() {
       toast.success("Login successful!");
       router.push("/");
     },
-    onError: (error: any) => {
+    onError: (error: any, variables) => {
       const message = error.response?.data?.message || "Something went wrong";
       toast.error(message);
+
+      if (message.includes("email belum diverifikasi")) {
+        setTimeout(() => {
+          router.push(`/verify-email?email=${variables.email}`);
+        }, 1500);
+      }
     },
   });
 

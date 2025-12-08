@@ -56,10 +56,10 @@ export default function RegisterPage() {
       const response = await api.post("/auth/register", data);
       return response.data;
     },
-    onSuccess: () => {
-      toast.success("Registration successful! Please login.");
+    onSuccess: (_data, variables) => {
+      toast.success("Registration successful! Please check your email for verification code.");
       setTimeout(() => {
-        router.push("/login");
+        router.push(`/verify-email?email=${variables.email}`);
       }, 1500);
     },
     onError: (error: any) => {

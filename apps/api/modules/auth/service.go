@@ -25,6 +25,7 @@ type Service interface {
 	Logout() (string, error)
 	LoginOrRegisterWithGoogle(googleUserInfo *oauth2.Userinfo) (*entities.User, string, error)
 	VerifyEmail(email string, code string) error
+	ResendVerificationCode(email string) error
 	ForgotPassword(input dto.ForgotPasswordInput) error
 	ResetPassword(input dto.ResetPasswordInput) error
 }
@@ -63,11 +64,12 @@ func (s *service) Register(user dto.UserRegister) (*entities.User, error) {
 	verificationCode := utils.GenerateVerificationCode()
 
 	userInput := &entities.User{
-		Name:             user.Name,
-		Email:            user.Email,
-		Password:         string(passwordHash),
-		Role:             "user",
-		VerificationCode: verificationCode,
+		Name:                   user.Name,
+		Email:                  user.Email,
+		Password:               string(passwordHash),
+		Role:                   "user",
+		VerificationCode:       verificationCode,
+		VerificationCodeExpiry: time.Now().Add(5 * time.Minute),
 	}
 
 	newUser, err := s.repository.Create(userInput)
@@ -75,7 +77,17 @@ func (s *service) Register(user dto.UserRegister) (*entities.User, error) {
 		return nil, err
 	}
 
-	go utils.SendEmail(newUser.Email, "Verifikasi Email", "Kode verifikasi Anda: "+verificationCode)
+	go func() {
+		err := utils.SendEmail(newUser.Email, "Verifikasi Email", "Kode verifikasi Anda: "+verificationCode)
+		if err != nil {
+			// Log the error using standard log package or just print it for now if no logger is set up
+			// Assuming standard log package usage is acceptable
+			// NOTE: 'log' needs to be imported.
+			println("Failed to send verification email:", err.Error())
+		} else {
+			println("Verification email sent to:", newUser.Email)
+		}
+	}()
 
 	return newUser, err
 }
@@ -93,6 +105,10 @@ func (s *service) Login(input dto.UserLogin) (*entities.User, string, error) {
 	err = bcrypt.CompareHashAndPassword([]byte(findUser.Password), []byte(input.Password))
 	if err != nil {
 		return nil, "", errors.New("email atau password salah")
+	}
+
+	if !findUser.IsVerified {
+		return nil, "", errors.New("email belum diverifikasi, silakan cek email anda")
 	}
 
 	token, err := s.generateTokenJWT(findUser.ID)
@@ -118,12 +134,47 @@ func (s *service) VerifyEmail(email string, code string) error {
 		return errors.New("kode verifikasi salah")
 	}
 
+	if time.Now().After(user.VerificationCodeExpiry) {
+		return errors.New("kode verifikasi kadaluarsa, silakan kirim ulang kode")
+	}
+
 	user.IsVerified = true
 	user.VerificationCode = ""
-	_, err = s.repository.Create(user)
+	_, err = s.repository.Update(user)
 	if err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (s *service) ResendVerificationCode(email string) error {
+	user, err := s.repository.FindByEmail(email)
+	if err != nil {
+		return errors.New("akun tidak ditemukan")
+	}
+
+	if user.IsVerified {
+		return errors.New("akun sudah diverifikasi")
+	}
+
+	code := utils.GenerateVerificationCode()
+	user.VerificationCode = code
+	user.VerificationCodeExpiry = time.Now().Add(5 * time.Minute)
+
+	_, err = s.repository.Update(user)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		err := utils.SendEmail(user.Email, "Verifikasi Email (Kirim Ulang)", "Kode verifikasi baru Anda: "+code)
+		if err != nil {
+			println("Failed to send verification email:", err.Error())
+		} else {
+			println("Verification email (resend) sent to:", user.Email)
+		}
+	}()
 
 	return nil
 }
@@ -179,9 +230,10 @@ func (s *service) LoginOrRegisterWithGoogle(googleUserInfo *oauth2.Userinfo) (*e
 	user, err := s.repository.FindByEmail(googleUserInfo.Email)
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		newUser := &entities.User{
-			Name:     googleUserInfo.Name,
-			Email:    googleUserInfo.Email,
-			Password: "",
+			Name:       googleUserInfo.Name,
+			Email:      googleUserInfo.Email,
+			Password:   "",
+			IsVerified: true,
 		}
 		createdUser, err := s.repository.Create(newUser)
 		if err != nil {
@@ -190,6 +242,11 @@ func (s *service) LoginOrRegisterWithGoogle(googleUserInfo *oauth2.Userinfo) (*e
 		user = createdUser
 	} else if err != nil {
 		return nil, "", err
+	}
+
+	if !user.IsVerified {
+		user.IsVerified = true
+		s.repository.Update(user)
 	}
 	token, err := s.generateTokenJWT(user.ID)
 	if err != nil {

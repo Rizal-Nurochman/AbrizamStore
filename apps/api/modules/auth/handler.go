@@ -25,6 +25,7 @@ type Handler interface {
 	GoogleLoginHandler(c *gin.Context)
 	GoogleCallbackHandler(c *gin.Context)
 	VerifyEmail(c *gin.Context)
+	ResendVerificationCode(c *gin.Context)
 	ForgotPassword(c *gin.Context)
 	ResetPassword(c *gin.Context)
 }
@@ -240,6 +241,28 @@ func (h *handler) VerifyEmail(c *gin.Context) {
 	}
 
 	res := utils.BuildResponseSuccess("Email berhasil diverifikasi", utils.EmptyObj{})
+	c.JSON(200, res)
+}
+
+func (h *handler) ResendVerificationCode(c *gin.Context) {
+	var input struct {
+		Email string `json:"email" binding:"required,email"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		res := utils.BuildResponseFailed("Input tidak valid", err.Error(), utils.EmptyObj{})
+		c.JSON(400, res)
+		return
+	}
+
+	err := h.service.ResendVerificationCode(input.Email)
+	if err != nil {
+		res := utils.BuildResponseFailed("Gagal mengirim ulang kode verifikasi", err.Error(), utils.EmptyObj{})
+		c.JSON(400, res)
+		return
+	}
+
+	res := utils.BuildResponseSuccess("Kode verifikasi baru telah dikirim", utils.EmptyObj{})
 	c.JSON(200, res)
 }
 
