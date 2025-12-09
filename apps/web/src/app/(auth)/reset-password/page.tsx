@@ -36,12 +36,43 @@ const resetPasswordSchema = z
 
 type ResetPasswordValues = z.infer<typeof resetPasswordSchema>;
 
+function SuccessView() {
+  return (
+    <div className="flex flex-col items-center justify-center p-8 space-y-4 animate-fade-in">
+
+      <div className="rounded-full bg-green-100 p-3 mb-4">
+        <svg
+          className="w-16 h-16 text-green-600 animate-[bounce_1s_ease-in-out_1]"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M5 13l4 4L19 7"
+          ></path>
+        </svg>
+      </div>
+      <h3 className="text-2xl font-bold text-gray-900 text-center">
+        Password Reset Successful!
+      </h3>
+      <p className="text-gray-500 text-center">
+        Your password has been securely updated. Redirecting to login...
+      </p>
+    </div>
+  );
+}
+
 // Separate component that uses search params
 function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tokenFromUrl = searchParams.get("token") || "";
   const [showPassword, setShowPassword] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   // Effect to validate token presence
   useEffect(() => {
@@ -52,6 +83,7 @@ function ResetPasswordContent() {
 
   const form = useForm<ResetPasswordValues>({
     resolver: zodResolver(resetPasswordSchema),
+    mode: "onChange",
     defaultValues: {
       token: tokenFromUrl,
       new_password: "",
@@ -59,25 +91,39 @@ function ResetPasswordContent() {
     },
   });
 
+  const {
+    watch,
+    formState: { errors, isValid, isDirty },
+    setValue,
+    handleSubmit,
+    register,
+  } = form;
+
+  const newPassword = watch("new_password");
+  const confirmPassword = watch("confirm_password");
+
   // Update form value if token comes in late
   useEffect(() => {
     if (tokenFromUrl) {
-      form.setValue("token", tokenFromUrl);
+      setValue("token", tokenFromUrl);
     }
-  }, [tokenFromUrl, form]);
+  }, [tokenFromUrl, setValue]);
 
   const mutation = useMutation({
     mutationFn: async (data: ResetPasswordValues) => {
       const response = await api.post("/auth/reset-password", data);
       return response.data;
     },
-    onSuccess: (data) => {
-      toast.success(data.message || "Password reset successfully");
-      router.push("/login");
+    onSuccess: () => {
+      setIsSuccess(true);
+      setTimeout(() => {
+        router.push("/login");
+      }, 3000);
     },
     onError: (error: unknown) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const message = (error as any).response?.data?.message || "Something went wrong";
+      const message =
+        (error as any).response?.data?.message || "Something went wrong";
       toast.error(message);
     },
   });
@@ -85,6 +131,14 @@ function ResetPasswordContent() {
   const onSubmit = (data: ResetPasswordValues) => {
     mutation.mutate(data);
   };
+
+  if (isSuccess) {
+    return (
+      <Card className="w-full shadow-lg border-t-4 border-t-green-600">
+        <SuccessView />
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full shadow-lg border-t-4 border-t-indigo-600">
@@ -97,9 +151,9 @@ function ResetPasswordContent() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Hidden token field */}
-          <input type="hidden" {...form.register("token")} />
+          <input type="hidden" {...register("token")} />
 
           <div className="space-y-2">
             <Label htmlFor="new_password">New Password</Label>
@@ -109,7 +163,7 @@ function ResetPasswordContent() {
                 id="new_password"
                 type={showPassword ? "text" : "password"}
                 className="pl-10 pr-10"
-                {...form.register("new_password")}
+                {...register("new_password")}
                 disabled={mutation.isPending}
               />
               <button
@@ -124,10 +178,19 @@ function ResetPasswordContent() {
                 )}
               </button>
             </div>
-            {form.formState.errors.new_password && (
-              <p className="text-sm text-red-500">
-                {form.formState.errors.new_password.message}
+            {/* Real-time validation feedback for New Password */}
+            {newPassword && (
+              <p
+                className={`text-sm ${newPassword.length >= 8 ? "text-green-600" : "text-red-500"
+                  }`}
+              >
+                {newPassword.length >= 8
+                  ? "Password valid"
+                  : "Password harus memiliki minimal 8 karakter"}
               </p>
+            )}
+            {errors.new_password && !newPassword && (
+              <p className="text-sm text-red-500">{errors.new_password.message}</p>
             )}
           </div>
 
@@ -139,14 +202,25 @@ function ResetPasswordContent() {
                 id="confirm_password"
                 type={showPassword ? "text" : "password"}
                 className="pl-10"
-                {...form.register("confirm_password")}
+                {...register("confirm_password")}
                 disabled={mutation.isPending}
               />
             </div>
-            {form.formState.errors.confirm_password && (
-              <p className="text-sm text-red-500">
-                {form.formState.errors.confirm_password.message}
+            {/* Real-time validation feedback for Confirm Password */}
+            {confirmPassword && (
+              <p
+                className={`text-sm ${confirmPassword === newPassword && confirmPassword.length >= 8
+                  ? "text-green-600"
+                  : "text-red-500"
+                  }`}
+              >
+                {confirmPassword === newPassword
+                  ? "Password sesuai"
+                  : "Password tidak sesuai"}
               </p>
+            )}
+            {errors.confirm_password && !confirmPassword && (
+              <p className="text-sm text-red-500">{errors.confirm_password.message}</p>
             )}
           </div>
 
@@ -154,6 +228,7 @@ function ResetPasswordContent() {
             className="w-full"
             type="submit"
             isLoading={mutation.isPending}
+            disabled={!isValid || !isDirty || mutation.isPending}
           >
             Reset Password
           </Button>
