@@ -27,7 +27,7 @@ export default function Home() {
             <div className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-600 dark:text-zinc-300">
               <Link href="#features" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Fitur</Link>
               <Link href="#benefits" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Keuntungan</Link>
-              <Link href="#pricing" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Harga</Link>
+
             </div>
 
             <div className="hidden md:flex items-center gap-4">
@@ -72,13 +72,7 @@ export default function Home() {
                 >
                   Keuntungan
                 </Link>
-                <Link
-                  href="#pricing"
-                  className="px-4 py-2 text-base font-medium text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Harga
-                </Link>
+
                 <div className="h-px bg-zinc-200 dark:bg-zinc-800 my-2"></div>
                 <Link
                   href="/login"
@@ -132,12 +126,7 @@ export default function Home() {
                   Mulai Sekarang
                   <ArrowRight className="h-5 w-5" />
                 </Link>
-                <Link
-                  href="#demo"
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-full border-2 border-zinc-200 bg-white px-8 py-3.5 text-base font-semibold text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-all"
-                >
-                  Lihat Demo
-                </Link>
+
               </div>
             </div>
 
