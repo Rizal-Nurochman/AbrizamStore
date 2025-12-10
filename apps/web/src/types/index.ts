@@ -21,9 +21,9 @@ export interface Category {
 export interface PaginatedResponse<T> {
   data: T[];
   meta: {
-    page: number;
+    current_page: number;
     limit: number;
-    total: number;
-    total_pages: number;
+    total_items: number;
+    total_page: number;
   };
 }

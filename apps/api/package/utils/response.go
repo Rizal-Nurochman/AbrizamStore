@@ -31,6 +31,23 @@ func BuildResponseFailed(message string, err string, data any) Response {
 	return res
 }
 
+type PaginationMeta struct {
+	CurrentPage int   `json:"current_page"`
+	TotalPage   int   `json:"total_page"`
+	TotalItems  int64 `json:"total_items"`
+	Limit       int   `json:"limit"`
+}
+
+func BuildResponseWithPagination(message string, data any, meta PaginationMeta) Response {
+	res := Response{
+		Status:  true,
+		Message: message,
+		Data:    data,
+		Meta:    meta,
+	}
+	return res
+}
+
 func StringToInt(str string) (int, error) {
 	result, err := strconv.Atoi(str)
 	if err != nil {

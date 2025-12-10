@@ -85,12 +85,21 @@ func (h *handler) GetAll(c *gin.Context) {
 		return
 	}
 
-	data := gin.H{
-		"produks": produks,
-		"total":   total,
+	totalPages := int(total) / limit
+	if int(total)%limit != 0 {
+		totalPages++
 	}
 
-	res := utils.BuildResponseSuccess("Produks retrieved successfully", data)
+	currentPage := (offset / limit) + 1
+
+	pagination := utils.PaginationMeta{
+		CurrentPage: currentPage,
+		TotalPage:   totalPages,
+		TotalItems:  total,
+		Limit:       limit,
+	}
+
+	res := utils.BuildResponseWithPagination("Produks retrieved successfully", produks, pagination)
 	c.JSON(200, res)
 }
 
@@ -140,12 +149,21 @@ func (h *handler) GetByName(c *gin.Context) {
 		return
 	}
 
-	data := gin.H{
-		"produks": produks,
-		"total":   total,
+	totalPages := int(total) / limit
+	if int(total)%limit != 0 {
+		totalPages++
 	}
 
-	res := utils.BuildResponseSuccess("Produks retrieved successfully", data)
+	currentPage := (offset / limit) + 1
+
+	pagination := utils.PaginationMeta{
+		CurrentPage: currentPage,
+		TotalPage:   totalPages,
+		TotalItems:  total,
+		Limit:       limit,
+	}
+
+	res := utils.BuildResponseWithPagination("Produks retrieved successfully", *produks, pagination)
 	c.JSON(200, res)
 }
 

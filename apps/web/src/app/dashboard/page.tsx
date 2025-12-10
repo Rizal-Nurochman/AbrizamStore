@@ -32,7 +32,7 @@ export default function DashboardPage() {
   };
 
   const handleNextPage = () => {
-    if (meta && page < meta.total_pages) {
+    if (meta && page < meta.total_page) {
       setPage((p) => p + 1);
     }
   };
@@ -105,7 +105,7 @@ export default function DashboardPage() {
             </motion.div>
 
             {/* Pagination Controls */}
-            {meta && meta.total_pages > 1 && (
+            {meta && meta.total_page > 1 && (
               <div className="mt-8 flex items-center justify-center gap-4">
                 <button
                   onClick={handlePrevPage}
@@ -115,11 +115,11 @@ export default function DashboardPage() {
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <span className="text-sm font-medium text-gray-600">
-                  Halaman {page} dari {meta.total_pages}
+                  Halaman {page} dari {meta.total_page}
                 </span>
                 <button
                   onClick={handleNextPage}
-                  disabled={page === meta.total_pages}
+                  disabled={page === meta.total_page}
                   className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
                 >
                   <ChevronRight className="w-5 h-5" />
