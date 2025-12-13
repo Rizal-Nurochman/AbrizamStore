@@ -16,6 +16,7 @@ func AuthRouter(api *gin.RouterGroup, DB *gorm.DB) {
 		auth.POST("/register", authHandler.Register)
 		auth.POST("/login", authHandler.Login)
 		auth.DELETE("/logout", authHandler.Logout)
+		auth.POST("/logout", authHandler.Logout)
 		auth.POST("/verify-email", authHandler.VerifyEmail)
 		auth.POST("/resend-verification", authHandler.ResendVerificationCode)
 		auth.POST("/forgot-password", authHandler.ForgotPassword)

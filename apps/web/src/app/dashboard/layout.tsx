@@ -1,4 +1,5 @@
 import { Sidebar } from "@/components/Sidebar";
+import { UserNav } from "@/components/UserNav";
 
 export default function DashboardLayout({
   children,
@@ -15,6 +16,9 @@ export default function DashboardLayout({
 
         <div className="relative h-screen overflow-y-auto scroll-smooth">
           <div className="p-4 lg:p-8 max-w-7xl mx-auto pb-24">
+            <div className="flex justify-end mb-6">
+              <UserNav />
+            </div>
             {children}
           </div>
         </div>
