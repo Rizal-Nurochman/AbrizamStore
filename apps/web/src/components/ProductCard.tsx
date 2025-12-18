@@ -32,10 +32,17 @@ export function ProductCard({ product, index }: ProductCardProps) {
       className="group relative bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl hover:shadow-violet-100 transition-all duration-300 border border-transparent hover:border-violet-100"
     >
       <div className="aspect-square rounded-xl bg-gray-50 mb-4 flex items-center justify-center overflow-hidden group-hover:bg-violet-50 transition-colors">
-        {/* Placeholder for product image if API doesn't provide one, using name abbreviation or icon */}
-        <div className="text-violet-200 group-hover:text-violet-400 transition-colors">
-          <ShoppingBag className="w-12 h-12" />
-        </div>
+        {product.foto_produk ? (
+          <img
+            src={product.foto_produk}
+            alt={product.nama_produk}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="text-violet-200 group-hover:text-violet-400 transition-colors">
+            <ShoppingBag className="w-12 h-12" />
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">

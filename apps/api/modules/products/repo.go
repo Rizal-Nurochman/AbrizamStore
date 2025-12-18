@@ -12,11 +12,12 @@ type repository struct {
 type Repository interface {
 	Create(produk *entities.Produk) error
 	FindAll(limit int, offset int) ([]entities.Produk, int64, error)
+	FindAllWithFilter(limit int, offset int, kategoriId *uint) ([]entities.Produk, int64, error)
 	FindByID(ID uint) (*entities.Produk, error)
 	FindByName(name string, limit int, offset int) (*[]entities.Produk, int64, error)
 	FindLowStock(stokThreshold int) ([]entities.Produk, int64, error)
 	Update(ID uint, produk entities.Produk) (*entities.Produk, error)
-	Delete(ID uint) (error)
+	Delete(ID uint) error
 }
 
 func NewRepository(db *gorm.DB) Repository {
@@ -38,6 +39,28 @@ func (r *repository) FindAll(limit int, offset int) ([]entities.Produk, int64, e
 
 	query := r.db.Model(&entities.Produk{})
 	query = query.Preload("Kategori")
+	query.Count(&total)
+
+	err := query.Limit(limit).Offset(offset).Find(&produks).Error
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return produks, total, nil
+}
+
+func (r *repository) FindAllWithFilter(limit int, offset int, kategoriId *uint) ([]entities.Produk, int64, error) {
+	var produks []entities.Produk
+	var total int64
+
+	query := r.db.Model(&entities.Produk{})
+	query = query.Preload("Kategori")
+
+	// Filter by category if provided
+	if kategoriId != nil {
+		query = query.Where("id_kategori = ?", *kategoriId)
+	}
+
 	query.Count(&total)
 
 	err := query.Limit(limit).Offset(offset).Find(&produks).Error
@@ -75,13 +98,13 @@ func (r *repository) FindByName(name string, limit int, offset int) (*[]entities
 
 func (r *repository) Update(ID uint, produk entities.Produk) (*entities.Produk, error) {
 	err := r.db.Model(&entities.Produk{}).Where("id = ?", ID).Updates(produk).Error
-if err != nil {
-    return nil, err
-}
-return &produk, nil
+	if err != nil {
+		return nil, err
+	}
+	return &produk, nil
 }
 
-func (r *repository) Delete(ID uint) (error) {
+func (r *repository) Delete(ID uint) error {
 	err := r.db.Where("id = ?", ID).Delete(&entities.Produk{}).Error
 	if err != nil {
 		return err
@@ -100,7 +123,7 @@ func (r *repository) FindLowStock(stokThreshold int) ([]entities.Produk, int64, 
 
 	query.Count(&total)
 
-	err := query.Order("stok asc").Find(&produks).Error 
+	err := query.Order("stok asc").Find(&produks).Error
 	if err != nil {
 		return nil, 0, err
 	}

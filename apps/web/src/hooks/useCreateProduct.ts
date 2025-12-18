@@ -9,6 +9,7 @@ interface CreateProductInput {
   harga_jual: number;
   stok: number;
   kategori_id?: number | null;
+  foto_produk?: string;
 }
 
 export const useCreateProduct = () => {

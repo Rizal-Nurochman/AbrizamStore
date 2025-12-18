@@ -48,6 +48,7 @@ func (h *handler) GetAll(c *gin.Context) {
 	limitStr := c.DefaultQuery("limit", "10")
 	offsetStr := c.DefaultQuery("offset", "0")
 	searchName := c.Query("nama_produk")
+	kategoriIdStr := c.Query("id_kategori")
 
 	limit, err := utils.StringToInt(limitStr)
 	if err != nil {
@@ -63,6 +64,15 @@ func (h *handler) GetAll(c *gin.Context) {
 		return
 	}
 
+	var kategoriId *uint
+	if kategoriIdStr != "" {
+		id, err := utils.StringToInt(kategoriIdStr)
+		if err == nil {
+			uid := uint(id)
+			kategoriId = &uid
+		}
+	}
+
 	var produks []entities.Produk
 	var total int64
 	var errService error
@@ -76,7 +86,7 @@ func (h *handler) GetAll(c *gin.Context) {
 		}
 
 	} else {
-		produks, total, errService = h.service.GetAll(limit, offset)
+		produks, total, errService = h.service.GetAllWithFilter(limit, offset, kategoriId)
 	}
 
 	if errService != nil {

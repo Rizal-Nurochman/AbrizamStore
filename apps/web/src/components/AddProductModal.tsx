@@ -24,9 +24,9 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
   const [hargaJual, setHargaJual] = useState<number>(0);
   const [kategoriId, setKategoriId] = useState<number | null>(null);
   const [stockMode, setStockMode] = useState<StockMode>("satuan");
-  const [stokSatuan, setStokSatuan] = useState<number>(1);
-  const [isiPerDus, setIsiPerDus] = useState<number>(12);
-  const [jumlahDus, setJumlahDus] = useState<number>(1);
+  const [stokSatuan, setStokSatuan] = useState<string>("");
+  const [isiPerDus, setIsiPerDus] = useState<string>("");
+  const [jumlahDus, setJumlahDus] = useState<string>("");
 
   // Hooks
   const { data: categories = [] } = useCategories();
@@ -34,8 +34,8 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
 
   // Calculate total stock
   const totalStock = stockMode === "satuan"
-    ? stokSatuan
-    : isiPerDus * jumlahDus;
+    ? (parseInt(stokSatuan) || 0)
+    : (parseInt(isiPerDus) || 0) * (parseInt(jumlahDus) || 0);
 
   // Reset form when modal closes
   useEffect(() => {
@@ -46,9 +46,9 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
       setHargaJual(0);
       setKategoriId(null);
       setStockMode("satuan");
-      setStokSatuan(1);
-      setIsiPerDus(12);
-      setJumlahDus(1);
+      setStokSatuan("");
+      setIsiPerDus("");
+      setJumlahDus("");
     }
   }, [isOpen]);
 
@@ -75,6 +75,7 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
         harga_jual: hargaJual,
         stok: totalStock,
         kategori_id: kategoriId,
+        foto_produk: imagePreview || undefined,
       });
 
       onClose();
@@ -285,7 +286,8 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
                           type="number"
                           min="1"
                           value={stokSatuan}
-                          onChange={(e) => setStokSatuan(Math.max(1, parseInt(e.target.value) || 1))}
+                          onChange={(e) => setStokSatuan(e.target.value)}
+                          placeholder="Masukkan jumlah satuan"
                           className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow"
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">pcs</span>
@@ -309,7 +311,8 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
                               type="number"
                               min="1"
                               value={isiPerDus}
-                              onChange={(e) => setIsiPerDus(Math.max(1, parseInt(e.target.value) || 1))}
+                              onChange={(e) => setIsiPerDus(e.target.value)}
+                              placeholder="Masukkan isi per dus"
                               className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow"
                             />
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">pcs</span>
@@ -324,7 +327,8 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
                               type="number"
                               min="1"
                               value={jumlahDus}
-                              onChange={(e) => setJumlahDus(Math.max(1, parseInt(e.target.value) || 1))}
+                              onChange={(e) => setJumlahDus(e.target.value)}
+                              placeholder="Masukkan jumlah dus"
                               className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow"
                             />
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">dus</span>

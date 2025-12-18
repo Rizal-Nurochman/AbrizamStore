@@ -25,10 +25,10 @@ func ConnectionDatabase() {
 	dbname := os.Getenv("DB_NAME")
 	dbport := os.Getenv("DB_PORT")
 
-	dsn := "host="+host+" user="+user+" password="+password+" dbname="+dbname+" port="+dbport+" sslmode=disable TimeZone=Asia/Shanghai"
+	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + dbport + " sslmode=disable TimeZone=Asia/Shanghai"
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Gagal koneksi database: ",err)
+		log.Fatal("Gagal koneksi database: ", err)
 	}
 
 	err = db.AutoMigrate(
@@ -40,12 +40,28 @@ func ConnectionDatabase() {
 		&entities.Kategori{},
 	)
 	if err != nil {
-		log.Fatal("Gagal migrasi tabel: ",err)
+		log.Fatal("Gagal migrasi tabel: ", err)
 	}
+
+	// Seed default categories
+	seedDefaultCategories(db)
 
 	fmt.Println("Koneksi database sukses!")
 }
 
+func seedDefaultCategories(db *gorm.DB) {
+	defaultCategories := []string{"Makanan", "Minuman", "Lain-lain"}
+
+	for _, name := range defaultCategories {
+		var existing entities.Kategori
+		result := db.Where("nama_kategori = ?", name).First(&existing)
+		if result.Error == gorm.ErrRecordNotFound {
+			db.Create(&entities.Kategori{Nama_Kategori: name})
+			fmt.Printf("Created default category: %s\n", name)
+		}
+	}
+}
+
 func GetDB() *gorm.DB {
-    return db
+	return db
 }

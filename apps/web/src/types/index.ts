@@ -8,6 +8,7 @@ export interface Product {
   harga_jual: number;
   stok: number;
   id_kategori: number;
+  foto_produk?: string;
 }
 
 export interface Category {

@@ -6,7 +6,7 @@ import { CategoryTabs } from "@/components/CategoryTabs";
 import { ProductCard } from "@/components/ProductCard";
 import { EmptyState } from "@/components/EmptyState";
 import { AddProductModal } from "@/components/AddProductModal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, ChevronLeft, ChevronRight, Loader2, Plus } from "lucide-react";
 
@@ -14,6 +14,17 @@ export default function DashboardPage() {
   const [page, setPage] = useState(1);
   const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(searchInput);
+      setPage(1); // Reset to page 1 on search
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   // Fetch Categories
   const { data: categories = [], isLoading: isLoadingCategories } = useCategories();
@@ -23,6 +34,7 @@ export default function DashboardPage() {
     page,
     limit: 10,
     categoryId: activeCategoryId,
+    search: searchQuery,
   });
 
   const products = productsData?.data || [];
@@ -65,6 +77,8 @@ export default function DashboardPage() {
             </div>
             <input
               type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent sm:text-sm transition-shadow shadow-sm hover:shadow-md"
               placeholder="Cari produk..."
             />
