@@ -2,10 +2,13 @@
 
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
-import Image from "next/image";
+
+interface EmptyStateProps {
+  onAddProduct?: () => void;
+}
 
 // You might want to replace the image src with an actual asset or different illustration
-export function EmptyState() {
+export function EmptyState({ onAddProduct }: EmptyStateProps) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -26,6 +29,7 @@ export function EmptyState() {
       </p>
 
       <motion.button
+        onClick={onAddProduct}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         animate={{
@@ -46,3 +50,4 @@ export function EmptyState() {
     </motion.div>
   );
 }
+

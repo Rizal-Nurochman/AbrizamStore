@@ -5,13 +5,15 @@ import { useProducts } from "@/hooks/useProducts";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { ProductCard } from "@/components/ProductCard";
 import { EmptyState } from "@/components/EmptyState";
+import { AddProductModal } from "@/components/AddProductModal";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Loader2, Plus } from "lucide-react";
 
 export default function DashboardPage() {
   const [page, setPage] = useState(1);
   const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Fetch Categories
   const { data: categories = [], isLoading: isLoadingCategories } = useCategories();
@@ -43,6 +45,10 @@ export default function DashboardPage() {
     }
   };
 
+  const handleOpenAddModal = () => {
+    setIsAddModalOpen(true);
+  };
+
   return (
     <div className="space-y-8">
       {/* Header Section */}
@@ -52,15 +58,26 @@ export default function DashboardPage() {
           <p className="text-gray-500 mt-1">Kelola dan pantau stok barang daganganmu.</p>
         </div>
 
-        <div className="relative w-full md:w-64">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+        <div className="flex items-center gap-3">
+          <div className="relative w-full md:w-64">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent sm:text-sm transition-shadow shadow-sm hover:shadow-md"
+              placeholder="Cari produk..."
+            />
           </div>
-          <input
-            type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent sm:text-sm transition-shadow shadow-sm hover:shadow-md"
-            placeholder="Cari produk..."
-          />
+          <motion.button
+            onClick={handleOpenAddModal}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-xl font-medium shadow-lg shadow-violet-200 hover:bg-violet-700 transition-colors whitespace-nowrap"
+          >
+            <Plus className="w-4 h-4" />
+            Tambah Barang
+          </motion.button>
         </div>
       </div>
 
@@ -128,9 +145,16 @@ export default function DashboardPage() {
             )}
           </>
         ) : (
-          <EmptyState />
+          <EmptyState onAddProduct={handleOpenAddModal} />
         )}
       </div>
+
+      {/* Add Product Modal */}
+      <AddProductModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+      />
     </div>
   );
 }
+
