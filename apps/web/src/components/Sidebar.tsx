@@ -1,12 +1,12 @@
 "use client";
 
-import { Home, Package, ShoppingCart, Settings, LogOut } from "lucide-react";
+import { MenuIcon, Package, ShoppingCart, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const sidebarItems = [
-  { icon: Home, label: "Home", href: "/dashboard" },
+  { icon: MenuIcon, label: "Dashboard", href: "/dashboard" },
   { icon: Package, label: "Produk", href: "/dashboard/products" },
   { icon: ShoppingCart, label: "Pesanan", href: "/dashboard/orders" },
   { icon: Settings, label: "Pengaturan", href: "/dashboard/settings" },
