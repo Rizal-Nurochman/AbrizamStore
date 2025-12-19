@@ -7,9 +7,10 @@ import { ShoppingBag } from "lucide-react";
 interface ProductCardProps {
   product: Product;
   index: number;
+  onClick?: (product: Product) => void;
 }
 
-export function ProductCard({ product, index }: ProductCardProps) {
+export function ProductCard({ product, index, onClick }: ProductCardProps) {
   // Format currency
   const formatRupiah = (number: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -29,7 +30,8 @@ export function ProductCard({ product, index }: ProductCardProps) {
         delay: index * 0.05,
         ease: "easeOut"
       }}
-      className="group relative bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl hover:shadow-violet-100 transition-all duration-300 border border-transparent hover:border-violet-100"
+      onClick={() => onClick?.(product)}
+      className="group relative bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl hover:shadow-violet-100 transition-all duration-300 border border-transparent hover:border-violet-100 cursor-pointer"
     >
       <div className="aspect-square rounded-xl bg-gray-50 mb-4 flex items-center justify-center overflow-hidden group-hover:bg-violet-50 transition-colors">
         {product.foto_produk ? (

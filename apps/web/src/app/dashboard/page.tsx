@@ -6,16 +6,23 @@ import { CategoryTabs } from "@/components/CategoryTabs";
 import { ProductCard } from "@/components/ProductCard";
 import { EmptyState } from "@/components/EmptyState";
 import { AddProductModal } from "@/components/AddProductModal";
+import { ProductDetailModal } from "@/components/ProductDetailModal";
+import { Product } from "@/types";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, ChevronLeft, ChevronRight, Loader2, Plus } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, ChevronDown, Loader2, Plus } from "lucide-react";
+
+const LIMIT_OPTIONS = [10, 20, 50] as const;
 
 export default function DashboardPage() {
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState<number>(10);
   const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Debounce search input
   useEffect(() => {
@@ -26,13 +33,19 @@ export default function DashboardPage() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
+  // Reset to page 1 when limit changes
+  const handleLimitChange = (newLimit: number) => {
+    setLimit(newLimit);
+    setPage(1);
+  };
+
   // Fetch Categories
   const { data: categories = [], isLoading: isLoadingCategories } = useCategories();
 
   // Fetch Products
   const { data: productsData, isLoading: isLoadingProducts } = useProducts({
     page,
-    limit: 10,
+    limit,
     categoryId: activeCategoryId,
     search: searchQuery,
   });
@@ -59,6 +72,11 @@ export default function DashboardPage() {
 
   const handleOpenAddModal = () => {
     setIsAddModalOpen(true);
+  };
+
+  const handleProductClick = (product: Product) => {
+    setSelectedProduct(product);
+    setIsDetailModalOpen(true);
   };
 
   return (
@@ -130,31 +148,60 @@ export default function DashboardPage() {
             >
               <AnimatePresence mode="popLayout">
                 {products.map((product, index) => (
-                  <ProductCard key={product.ID} product={product} index={index} />
+                  <ProductCard
+                    key={product.ID}
+                    product={product}
+                    index={index}
+                    onClick={handleProductClick}
+                  />
                 ))}
               </AnimatePresence>
             </motion.div>
 
             {/* Pagination Controls */}
-            {meta && meta.total_page > 1 && (
-              <div className="mt-8 flex items-center justify-center gap-4">
-                <button
-                  onClick={handlePrevPage}
-                  disabled={page === 1}
-                  className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <span className="text-sm font-medium text-gray-600">
-                  Halaman {page} dari {meta.total_page}
-                </span>
-                <button
-                  onClick={handleNextPage}
-                  disabled={page === meta.total_page}
-                  className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
+            {meta && (
+              <div className="mt-8 flex items-center justify-center gap-6">
+                {/* Limit Selector */}
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">Tampilkan:</span>
+                  <div className="relative">
+                    <select
+                      value={limit}
+                      onChange={(e) => handleLimitChange(Number(e.target.value))}
+                      className="appearance-none bg-white border border-gray-200 rounded-lg px-3 py-2 pr-8 text-sm font-medium text-gray-700 hover:border-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent cursor-pointer transition-colors"
+                    >
+                      {LIMIT_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt} produk
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* Page Navigation */}
+                {meta.total_page > 1 && (
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={handlePrevPage}
+                      disabled={page === 1}
+                      className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <span className="text-sm font-medium text-gray-600">
+                      Halaman {page} dari {meta.total_page}
+                    </span>
+                    <button
+                      onClick={handleNextPage}
+                      disabled={page === meta.total_page}
+                      className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </>
@@ -167,6 +214,13 @@ export default function DashboardPage() {
       <AddProductModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
+      />
+
+      {/* Product Detail Modal */}
+      <ProductDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        product={selectedProduct}
       />
     </div>
   );
