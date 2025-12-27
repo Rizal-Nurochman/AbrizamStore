@@ -1,221 +1,271 @@
 "use client";
 
-import { useCategories } from "@/hooks/useCategories";
-import { useProducts } from "@/hooks/useProducts";
-import { CategoryTabs } from "@/components/CategoryTabs";
-import { ProductCard } from "@/components/ProductCard";
-import { EmptyState } from "@/components/EmptyState";
-import { AddProductModal } from "@/components/AddProductModal";
-import { ProductDetailModal } from "@/components/ProductDetailModal";
-import { Product } from "@/types";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, ChevronLeft, ChevronRight, ChevronDown, Loader2, Plus } from "lucide-react";
-
-const LIMIT_OPTIONS = [10, 20, 50] as const;
+import { motion } from "framer-motion";
+import {
+  LayoutDashboard,
+  TrendingUp,
+  Calendar,
+  DollarSign,
+  ShoppingBag,
+  Package,
+  Loader2,
+  Trophy,
+  BarChart3
+} from "lucide-react";
+import { useDashboardSummary, useTopProducts, useSalesTrend } from "@/hooks/useDashboard";
 
 export default function DashboardPage() {
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState<number>(10);
-  const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [searchInput, setSearchInput] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const { data: summary, isLoading: summaryLoading } = useDashboardSummary();
+  const { data: topProducts, isLoading: topProductsLoading } = useTopProducts();
+  const { data: salesTrend, isLoading: trendLoading } = useSalesTrend();
 
-  // Debounce search input
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearchQuery(searchInput);
-      setPage(1); // Reset to page 1 on search
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
+  const isLoading = summaryLoading || topProductsLoading || trendLoading;
 
-  // Reset to page 1 when limit changes
-  const handleLimitChange = (newLimit: number) => {
-    setLimit(newLimit);
-    setPage(1);
+  // Format currency
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(amount);
   };
 
-  // Fetch Categories
-  const { data: categories = [], isLoading: isLoadingCategories } = useCategories();
-
-  // Fetch Products
-  const { data: productsData, isLoading: isLoadingProducts } = useProducts({
-    page,
-    limit,
-    categoryId: activeCategoryId,
-    search: searchQuery,
-  });
-
-  const products = productsData?.data || [];
-  const meta = productsData?.meta;
-
-  const handleCategorySelect = (id: number | null) => {
-    setActiveCategoryId(id);
-    setPage(1); // Reset to page 1 on category change
+  // Format date for chart
+  const formatChartDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "numeric",
+      month: "short",
+    }).format(date);
   };
 
-  const handleNextPage = () => {
-    if (meta && page < meta.total_page) {
-      setPage((p) => p + 1);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (page > 1) {
-      setPage((p) => p - 1);
-    }
-  };
-
-  const handleOpenAddModal = () => {
-    setIsAddModalOpen(true);
-  };
-
-  const handleProductClick = (product: Product) => {
-    setSelectedProduct(product);
-    setIsDetailModalOpen(true);
-  };
+  // Calculate max for chart scaling
+  const maxTrendValue = Math.max(...(salesTrend?.map(item => item.total_omzet) || [0]), 1);
 
   return (
-    <div className="space-y-8">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <>
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-8">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-200">
+          <LayoutDashboard className="w-6 h-6 text-white" />
+        </div>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Katalog Produk</h1>
-          <p className="text-gray-500 mt-1">Kelola dan pantau stok barang daganganmu.</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="relative w-full md:w-64">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent sm:text-sm transition-shadow shadow-sm hover:shadow-md"
-              placeholder="Cari produk..."
-            />
-          </div>
-
-          {/* Limit Selector */}
-          <div className="relative">
-            <select
-              value={limit}
-              onChange={(e) => handleLimitChange(Number(e.target.value))}
-              className="appearance-none bg-white border border-gray-200 rounded-xl px-3 py-2 pr-8 text-sm font-medium text-gray-700 hover:border-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent cursor-pointer transition-colors shadow-sm hover:shadow-md"
-            >
-              {LIMIT_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt} produk
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-          </div>
-
-          <motion.button
-            onClick={handleOpenAddModal}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 bg-violet-600 text-white px-4 py-2 rounded-xl font-medium shadow-lg shadow-violet-200 hover:bg-violet-700 transition-colors whitespace-nowrap"
-          >
-            <Plus className="w-4 h-4" />
-            Tambah Barang
-          </motion.button>
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-sm text-gray-500">Ringkasan analisis bisnis Anda</p>
         </div>
       </div>
 
-      {/* Categories */}
-      <div className="sticky top-0 z-40 py-4 -mx-4 px-4 bg-[#F8F9FC]/80 backdrop-blur-md">
-        {isLoadingCategories ? (
-          <div className="flex gap-2 animate-pulse">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-10 w-24 bg-gray-200 rounded-full" />
-            ))}
-          </div>
-        ) : (
-          <CategoryTabs
-            categories={categories}
-            activeCategoryId={activeCategoryId}
-            onSelectCategory={handleCategorySelect}
-          />
-        )}
-      </div>
-
-      {/* Main Content Area - Glassmorphism */}
-      <div className="bg-white/60 backdrop-blur-xl rounded-3xl border border-white/20 shadow-xl shadow-gray-200/50 min-h-[500px] p-6">
-        {isLoadingProducts ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="bg-white rounded-2xl p-4 h-[300px] border border-gray-100 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 text-violet-200 animate-spin" />
-              </div>
-            ))}
-          </div>
-        ) : products.length > 0 ? (
-          <>
+      {isLoading ? (
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 text-violet-600 animate-spin" />
+        </div>
+      ) : (
+        <>
+          {/* Financial Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            {/* Today */}
             <motion.div
-              layout
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
             >
-              <AnimatePresence mode="popLayout">
-                {products.map((product, index) => (
-                  <ProductCard
-                    key={product.ID}
-                    product={product}
-                    index={index}
-                    onClick={handleProductClick}
-                  />
-                ))}
-              </AnimatePresence>
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-green-600" />
+                </div>
+                <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">
+                  Hari Ini
+                </span>
+              </div>
+              <p className="text-2xl font-bold text-gray-900 mb-1">
+                {formatCurrency(summary?.today_omzet || 0)}
+              </p>
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <ShoppingBag className="w-4 h-4" />
+                <span>{summary?.today_transaksi || 0} transaksi</span>
+              </div>
             </motion.div>
 
-            {/* Pagination Controls */}
-            {meta && meta.total_page > 1 && (
-              <div className="mt-8 flex items-center justify-center gap-4">
-                <button
-                  onClick={handlePrevPage}
-                  disabled={page === 1}
-                  className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <span className="text-sm font-medium text-gray-600">
-                  Halaman {page} dari {meta.total_page}
+            {/* This Week */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-blue-600" />
+                </div>
+                <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                  Minggu Ini
                 </span>
-                <button
-                  onClick={handleNextPage}
-                  disabled={page === meta.total_page}
-                  className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
               </div>
-            )}
-          </>
-        ) : (
-          <EmptyState onAddProduct={handleOpenAddModal} />
-        )}
-      </div>
+              <p className="text-2xl font-bold text-gray-900 mb-1">
+                {formatCurrency(summary?.weekly_omzet || 0)}
+              </p>
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <ShoppingBag className="w-4 h-4" />
+                <span>{summary?.weekly_transaksi || 0} transaksi</span>
+              </div>
+            </motion.div>
 
-      {/* Add Product Modal */}
-      <AddProductModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-      />
+            {/* This Month */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center">
+                  <DollarSign className="w-6 h-6 text-violet-600" />
+                </div>
+                <span className="text-xs font-medium text-violet-600 bg-violet-50 px-2 py-1 rounded-full">
+                  Bulan Ini
+                </span>
+              </div>
+              <p className="text-2xl font-bold text-gray-900 mb-1">
+                {formatCurrency(summary?.monthly_omzet || 0)}
+              </p>
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <ShoppingBag className="w-4 h-4" />
+                <span>{summary?.monthly_transaksi || 0} transaksi</span>
+              </div>
+            </motion.div>
+          </div>
 
-      {/* Product Detail Modal */}
-      <ProductDetailModal
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
-        product={selectedProduct}
-      />
-    </div>
+          {/* Charts and Top Products Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Sales Trend Chart */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-indigo-600" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">Tren Penjualan</h3>
+                  <p className="text-sm text-gray-500">7 hari terakhir</p>
+                </div>
+              </div>
+
+              {/* Simple Bar Chart */}
+              <div className="h-48 flex items-end gap-2">
+                {salesTrend && salesTrend.length > 0 ? (
+                  salesTrend.map((item, index) => {
+                    const height = (item.total_omzet / maxTrendValue) * 100;
+                    return (
+                      <motion.div
+                        key={item.date}
+                        initial={{ height: 0 }}
+                        animate={{ height: `${Math.max(height, 5)}%` }}
+                        transition={{ delay: 0.4 + index * 0.1 }}
+                        className="flex-1 flex flex-col items-center gap-2"
+                      >
+                        <div
+                          className="w-full bg-gradient-to-t from-violet-500 to-indigo-500 rounded-t-lg relative group cursor-pointer"
+                          style={{ height: "100%" }}
+                        >
+                          {/* Tooltip */}
+                          <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs py-2 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                            {formatCurrency(item.total_omzet)}
+                          </div>
+                        </div>
+                        <span className="text-xs text-gray-500 truncate w-full text-center">
+                          {formatChartDate(item.date)}
+                        </span>
+                      </motion.div>
+                    );
+                  })
+                ) : (
+                  <div className="flex-1 flex items-center justify-center text-gray-400">
+                    <div className="text-center">
+                      <BarChart3 className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">Belum ada data penjualan</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Top Selling Products */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                  <Trophy className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">Produk Terlaris</h3>
+                  <p className="text-sm text-gray-500">Top 5 paling banyak terjual</p>
+                </div>
+              </div>
+
+              {topProducts && topProducts.length > 0 ? (
+                <div className="space-y-4">
+                  {topProducts.map((product, index) => {
+                    const maxSold = Math.max(...topProducts.map(p => p.total_terjual), 1);
+                    const percentage = (product.total_terjual / maxSold) * 100;
+
+                    const medals = ["🥇", "🥈", "🥉"];
+                    const medal = medals[index] || `${index + 1}.`;
+
+                    return (
+                      <motion.div
+                        key={product.nama_produk}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.5 + index * 0.1 }}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">{medal}</span>
+                            <span className="font-medium text-gray-900 truncate max-w-[200px]">
+                              {product.nama_produk}
+                            </span>
+                          </div>
+                          <span className="text-sm font-semibold text-violet-600">
+                            {product.total_terjual} terjual
+                          </span>
+                        </div>
+                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${percentage}%` }}
+                            transition={{ delay: 0.6 + index * 0.1, duration: 0.5 }}
+                            className={`h-full rounded-full ${index === 0
+                                ? "bg-gradient-to-r from-amber-400 to-yellow-500"
+                                : index === 1
+                                  ? "bg-gradient-to-r from-gray-300 to-gray-400"
+                                  : index === 2
+                                    ? "bg-gradient-to-r from-amber-600 to-amber-700"
+                                    : "bg-gradient-to-r from-violet-400 to-indigo-500"
+                              }`}
+                          />
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-48 text-gray-400">
+                  <Package className="w-12 h-12 mb-2 opacity-50" />
+                  <p className="text-sm">Belum ada data produk terlaris</p>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        </>
+      )}
+    </>
   );
 }
-

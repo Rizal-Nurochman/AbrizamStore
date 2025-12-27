@@ -17,5 +17,6 @@ func DashboardRouter(api *gin.RouterGroup, DB *gorm.DB) {
 	{
 		protected.GET("/summary", dashboardHandler.GetSummary)
 		protected.GET("/top-products", dashboardHandler.GetTopProducts)
+		protected.GET("/sales-trend", dashboardHandler.GetSalesTrend)
 	}
 }

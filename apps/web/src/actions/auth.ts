@@ -10,7 +10,7 @@ export async function logoutAction() {
   try {
     if (token) {
       // Attempt to call backend logout endpoint
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8888"}/api/v1/auth/logout`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/auth/logout`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

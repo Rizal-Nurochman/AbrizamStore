@@ -1,16 +1,19 @@
 "use client";
 
-import { MenuIcon, Package, ShoppingCart, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, Settings, LogOut, CreditCard, PackagePlus, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const sidebarItems = [
-  { icon: MenuIcon, label: "Dashboard", href: "/dashboard" },
+  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: Package, label: "Produk", href: "/dashboard/products" },
-  { icon: ShoppingCart, label: "Pesanan", href: "/dashboard/orders" },
+  { icon: CreditCard, label: "Kasir (POS)", href: "/dashboard/pos" },
+  { icon: PackagePlus, label: "Restock", href: "/dashboard/restock" },
+  { icon: ClipboardList, label: "Riwayat Transaksi", href: "/dashboard/transactions" },
   { icon: Settings, label: "Pengaturan", href: "/dashboard/settings" },
 ];
+
 
 export function Sidebar() {
   const pathname = usePathname();

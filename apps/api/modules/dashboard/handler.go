@@ -10,6 +10,7 @@ import (
 type Handler interface {
 	GetSummary(c *gin.Context)
 	GetTopProducts(c *gin.Context)
+	GetSalesTrend(c *gin.Context)
 }
 
 type handler struct {
@@ -41,5 +42,17 @@ func (h *handler) GetTopProducts(c *gin.Context) {
 	}
 
 	res := utils.BuildResponseSuccess("Top selling products retrieved successfully", topProducts)
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *handler) GetSalesTrend(c *gin.Context) {
+	trend, err := h.service.GetSalesTrend()
+	if err != nil {
+		res := utils.BuildResponseFailed("Failed to get sales trend", err.Error(), utils.EmptyObj{})
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	res := utils.BuildResponseSuccess("Sales trend retrieved successfully", trend)
 	c.JSON(http.StatusOK, res)
 }

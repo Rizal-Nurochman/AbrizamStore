@@ -28,3 +28,54 @@ export interface PaginatedResponse<T> {
     total_page: number;
   };
 }
+
+// Cart item for POS (penjualan)
+export interface POSCartItem {
+  product: Product;
+  quantity: number;
+}
+
+// Restock item for pembelian
+export interface RestockCartItem {
+  product: Product;
+  quantity: number;
+  buyPrice: number;
+}
+
+// Detail Penjualan
+export interface DetailPenjualan {
+  ID: number;
+  id_produk: number;
+  id_penjualan: number;
+  harga_jual: number;
+  jumlah: number;
+  subtotal: number;
+}
+
+// Detail Pembelian
+export interface DetailPembelian {
+  ID: number;
+  id_produk: number;
+  id_pembelian: number;
+  harga_beli: number;
+  jumlah: number;
+  subtotal: number;
+}
+
+// Penjualan (Sale)
+export interface Penjualan {
+  ID: number;
+  CreatedAt: string;
+  total_penjualan: number;
+  id_user: number;
+  DetailPenjualan?: DetailPenjualan[];
+}
+
+// Pembelian (Purchase/Restock)
+export interface Pembelian {
+  ID: number;
+  CreatedAt: string;
+  total_pembelian: number;
+  id_user: number;
+  DetailPembelian?: DetailPembelian[];
+}
