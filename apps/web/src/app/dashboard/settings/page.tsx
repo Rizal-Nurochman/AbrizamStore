@@ -17,7 +17,7 @@ export default function SettingsPage() {
   // Profile form state
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [profileImage, setProfileImage] = useState("");
+
 
   // Password form state
   const [currentPassword, setCurrentPassword] = useState("");
@@ -36,7 +36,7 @@ export default function SettingsPage() {
     if (profile) {
       setName(profile.name || "");
       setEmail(profile.email || "");
-      setProfileImage(profile.profile_image || "");
+
     }
   });
 
@@ -44,7 +44,7 @@ export default function SettingsPage() {
   if (profile && !name && !email) {
     setName(profile.name || "");
     setEmail(profile.email || "");
-    setProfileImage(profile.profile_image || "");
+
   }
 
   const handleProfileSubmit = async (e: React.FormEvent) => {
@@ -55,7 +55,7 @@ export default function SettingsPage() {
       await updateProfile.mutateAsync({
         name: name !== profile?.name ? name : undefined,
         email: email !== profile?.email ? email : undefined,
-        profile_image: profileImage !== profile?.profile_image ? profileImage : undefined,
+
       });
       setProfileMessage({ type: "success", text: "Profil berhasil diperbarui!" });
     } catch (error: unknown) {
@@ -136,31 +136,13 @@ export default function SettingsPage() {
           <CardContent>
             <form onSubmit={handleProfileSubmit} className="space-y-6">
               {/* Avatar Section */}
-              <div className="flex flex-col items-center gap-4">
-                <div className="relative group">
-                  <Avatar className="w-24 h-24 border-4 border-white shadow-xl">
-                    <AvatarImage src={profileImage} alt={name} />
-                    <AvatarFallback className="bg-gradient-to-br from-violet-500 to-indigo-500 text-white text-2xl font-bold">
-                      {getInitials(name || "U")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                    <Camera className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-                <div className="w-full">
-                  <Label htmlFor="profileImage" className="text-sm text-gray-600">
-                    URL Foto Profil
-                  </Label>
-                  <Input
-                    id="profileImage"
-                    type="url"
-                    placeholder="https://example.com/photo.jpg"
-                    value={profileImage}
-                    onChange={(e) => setProfileImage(e.target.value)}
-                    className="mt-1"
-                  />
-                </div>
+              <div className="flex flex-col items-center gap-4 mb-2">
+                <Avatar className="w-24 h-24 border-4 border-white shadow-xl">
+                  <AvatarImage src={profile?.profile_image} alt={name} />
+                  <AvatarFallback className="bg-gradient-to-br from-violet-500 to-indigo-500 text-white text-2xl font-bold">
+                    {getInitials(name || "U")}
+                  </AvatarFallback>
+                </Avatar>
               </div>
 
               {/* Name Field */}
@@ -203,8 +185,8 @@ export default function SettingsPage() {
               {profileMessage && (
                 <div
                   className={`flex items-center gap-2 p-3 rounded-lg ${profileMessage.type === "success"
-                      ? "bg-green-50 text-green-700"
-                      : "bg-red-50 text-red-700"
+                    ? "bg-green-50 text-green-700"
+                    : "bg-red-50 text-red-700"
                     }`}
                 >
                   {profileMessage.type === "success" ? (
@@ -347,8 +329,8 @@ export default function SettingsPage() {
               {passwordMessage && (
                 <div
                   className={`flex items-center gap-2 p-3 rounded-lg ${passwordMessage.type === "success"
-                      ? "bg-green-50 text-green-700"
-                      : "bg-red-50 text-red-700"
+                    ? "bg-green-50 text-green-700"
+                    : "bg-red-50 text-red-700"
                     }`}
                 >
                   {passwordMessage.type === "success" ? (
