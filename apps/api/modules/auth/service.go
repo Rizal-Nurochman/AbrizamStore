@@ -68,6 +68,7 @@ func (s *service) Register(user dto.UserRegister) (*entities.User, error) {
 		Email:                  user.Email,
 		Password:               string(passwordHash),
 		Role:                   "user",
+		AuthProvider:           entities.AuthProviderPassword,
 		VerificationCode:       verificationCode,
 		VerificationCodeExpiry: time.Now().Add(5 * time.Minute),
 	}
@@ -101,6 +102,11 @@ func (s *service) Login(input dto.UserLogin) (*entities.User, string, error) {
 
 	if findUser == nil {
 		return nil, "", errors.New("email atau password salah")
+	}
+
+	// Check if user registered with password
+	if findUser.AuthProvider != entities.AuthProviderPassword {
+		return nil, "", errors.New("akun ini terdaftar menggunakan Google. Silakan login dengan Google.")
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(findUser.Password), []byte(input.Password))
@@ -243,11 +249,13 @@ func (s *service) ResetPassword(input dto.ResetPasswordInput) error {
 func (s *service) LoginOrRegisterWithGoogle(googleUserInfo *oauth2.Userinfo) (*entities.User, string, error) {
 	user, err := s.repository.FindByEmail(googleUserInfo.Email)
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		// New user - register with Google
 		newUser := &entities.User{
-			Name:       googleUserInfo.Name,
-			Email:      googleUserInfo.Email,
-			Password:   "",
-			IsVerified: true,
+			Name:         googleUserInfo.Name,
+			Email:        googleUserInfo.Email,
+			Password:     "",
+			AuthProvider: entities.AuthProviderGoogle,
+			IsVerified:   true,
 		}
 		createdUser, err := s.repository.Create(newUser)
 		if err != nil {
@@ -256,6 +264,11 @@ func (s *service) LoginOrRegisterWithGoogle(googleUserInfo *oauth2.Userinfo) (*e
 		user = createdUser
 	} else if err != nil {
 		return nil, "", err
+	} else {
+		// Existing user - check if they registered with Google
+		if user.AuthProvider != entities.AuthProviderGoogle {
+			return nil, "", errors.New("akun ini terdaftar menggunakan password. Silakan login dengan email dan password.")
+		}
 	}
 
 	if !user.IsVerified {

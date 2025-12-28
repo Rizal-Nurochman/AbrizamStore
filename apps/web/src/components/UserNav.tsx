@@ -15,17 +15,31 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { logoutAction } from "@/actions/auth";
-import { LogOut, User } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
+import { useProfile } from "@/hooks/useProfile";
+import Link from "next/link";
 
 export function UserNav() {
+  const { data: profile, isLoading } = useProfile();
+
+  const getInitials = (name: string) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="relative h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 transition-all">
           <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
-            <AvatarImage src="/avatars/01.png" alt="@user" />
+            <AvatarImage src={profile?.profile_image} alt={profile?.name} />
             <AvatarFallback className="bg-gradient-to-br from-violet-500 to-indigo-500 text-white font-medium">
-              U
+              {isLoading ? "..." : getInitials(profile?.name || "U")}
             </AvatarFallback>
           </Avatar>
         </button>
@@ -33,18 +47,22 @@ export function UserNav() {
       <DropdownMenuContent className="w-56 z-50 backdrop-blur-xl" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">User</p>
+            <p className="text-sm font-medium leading-none">
+              {isLoading ? "Loading..." : profile?.name || "User"}
+            </p>
             <p className="text-xs leading-none text-muted-foreground">
-              user@example.com
+              {isLoading ? "..." : profile?.email || "user@example.com"}
             </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem className="cursor-pointer">
-            <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
-          </DropdownMenuItem>
+          <Link href="/dashboard/settings">
+            <DropdownMenuItem className="cursor-pointer">
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Pengaturan</span>
+            </DropdownMenuItem>
+          </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -58,3 +76,4 @@ export function UserNav() {
     </DropdownMenu>
   );
 }
+

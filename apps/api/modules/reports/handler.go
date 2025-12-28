@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/abrizamstore/database/entities"
 	"github.com/abrizamstore/package/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -23,6 +24,9 @@ func NewHandler(service Service) Handler {
 }
 
 func (h *handler) GetSalesReport(c *gin.Context) {
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
+
 	// Parse date parameters
 	startDateStr := c.DefaultQuery("start_date", time.Now().AddDate(0, -1, 0).Format("2006-01-02"))
 	endDateStr := c.DefaultQuery("end_date", time.Now().Format("2006-01-02"))
@@ -44,7 +48,7 @@ func (h *handler) GetSalesReport(c *gin.Context) {
 	// Add end of day to endDate
 	endDate = endDate.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
 
-	report, err := h.service.GetSalesReport(startDate, endDate)
+	report, err := h.service.GetSalesReport(startDate, endDate, user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to get sales report", err.Error(), utils.EmptyObj{})
 		c.JSON(http.StatusInternalServerError, res)
@@ -56,6 +60,9 @@ func (h *handler) GetSalesReport(c *gin.Context) {
 }
 
 func (h *handler) GetProfitLossReport(c *gin.Context) {
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
+
 	// Parse date parameters
 	startDateStr := c.DefaultQuery("start_date", time.Now().AddDate(0, -1, 0).Format("2006-01-02"))
 	endDateStr := c.DefaultQuery("end_date", time.Now().Format("2006-01-02"))
@@ -77,7 +84,7 @@ func (h *handler) GetProfitLossReport(c *gin.Context) {
 	// Add end of day to endDate
 	endDate = endDate.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
 
-	report, err := h.service.GetProfitLossReport(startDate, endDate)
+	report, err := h.service.GetProfitLossReport(startDate, endDate, user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to get profit/loss report", err.Error(), utils.EmptyObj{})
 		c.JSON(http.StatusInternalServerError, res)
@@ -89,7 +96,10 @@ func (h *handler) GetProfitLossReport(c *gin.Context) {
 }
 
 func (h *handler) GetStockReport(c *gin.Context) {
-	report, err := h.service.GetStockReport()
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
+
+	report, err := h.service.GetStockReport(user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to get stock report", err.Error(), utils.EmptyObj{})
 		c.JSON(http.StatusInternalServerError, res)

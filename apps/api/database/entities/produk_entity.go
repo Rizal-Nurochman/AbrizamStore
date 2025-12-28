@@ -10,6 +10,9 @@ type Produk struct {
 	Stok        int    `json:"stok"`
 	Foto_Produk string `json:"foto_produk"`
 
+	ID_User *uint `json:"id_user"`
+	User    User  `gorm:"foreignKey:ID_User"`
+
 	ID_Kategori *uint    `json:"id_kategori"`
 	Kategori    Kategori `gorm:"foreignKey:ID_Kategori"`
 

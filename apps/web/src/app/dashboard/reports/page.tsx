@@ -10,7 +10,6 @@ import {
   Download,
   Calendar,
   Loader2,
-  HelpCircle,
   AlertTriangle,
   CheckCircle,
   Info
@@ -18,7 +17,6 @@ import {
 import { useSalesReport, useProfitLossReport, useStockReport } from "@/hooks/useReports";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import * as XLSX from "xlsx";
 
 type TabType = "sales" | "profit" | "stock";
 
@@ -72,8 +70,15 @@ export default function ReportsPage() {
       doc.setFontSize(14);
       doc.text("Laporan Penjualan", 14, 40);
 
+      // Summary section
+      const labaBersih = profitData?.total_laba || 0;
+      doc.setFontSize(10);
+      doc.text(`Total Omzet: ${formatCurrency(salesData.total_omzet)}`, 14, 50);
+      doc.text(`Total Transaksi: ${salesData.total_transaksi}`, 14, 56);
+      doc.text(`Laba Bersih: ${formatCurrency(labaBersih)}`, 14, 62);
+
       autoTable(doc, {
-        startY: 45,
+        startY: 70,
         head: [["No", "Tanggal", "Jumlah Item", "Total Penjualan"]],
         body: salesData.items.map((item, index) => [
           index + 1,
@@ -83,6 +88,12 @@ export default function ReportsPage() {
         ]),
         foot: [["", "TOTAL", salesData.total_transaksi + " transaksi", formatCurrency(salesData.total_omzet)]],
       });
+
+      // Add laba bersih at the bottom
+      const finalY = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY;
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text(`LABA BERSIH: ${formatCurrency(labaBersih)}`, 14, finalY + 10);
     } else if (activeTab === "profit" && profitData) {
       doc.setFontSize(14);
       doc.text("Laporan Laba Rugi", 14, 40);
@@ -121,50 +132,6 @@ export default function ReportsPage() {
     doc.save(`laporan-${activeTab}-${startDate}-${endDate}.pdf`);
   };
 
-  // Export to Excel
-  const exportToExcel = () => {
-    let data: Record<string, unknown>[] = [];
-    let filename = "";
-
-    if (activeTab === "sales" && salesData) {
-      data = salesData.items.map((item, index) => ({
-        "No": index + 1,
-        "Tanggal": formatDate(item.tanggal),
-        "Jumlah Item": item.jumlah_item,
-        "Total Penjualan": item.total_penjualan,
-      }));
-      filename = `laporan-penjualan-${startDate}-${endDate}.xlsx`;
-    } else if (activeTab === "profit" && profitData) {
-      data = profitData.items.map((item) => ({
-        "Produk": item.nama_produk,
-        "Jumlah Terjual": item.jumlah_terjual,
-        "Harga Beli": item.harga_beli,
-        "Harga Jual": item.harga_jual,
-        "Total Modal": item.total_modal,
-        "Total Penjualan": item.total_penjualan,
-        "Laba": item.laba,
-      }));
-      filename = `laporan-laba-rugi-${startDate}-${endDate}.xlsx`;
-    } else if (activeTab === "stock" && stockData) {
-      data = stockData.items.map((item) => ({
-        "Produk": item.nama_produk,
-        "Kategori": item.kategori,
-        "Stok": item.stok,
-        "Harga Beli": item.harga_beli,
-        "Harga Jual": item.harga_jual,
-        "Nilai Modal": item.nilai_modal,
-        "Nilai Jual": item.nilai_jual,
-        "Potensial Laba": item.potensial_laba,
-        "Status": item.status,
-      }));
-      filename = `laporan-stok-${today.toISOString().split("T")[0]}.xlsx`;
-    }
-
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Laporan");
-    XLSX.writeFile(wb, filename);
-  };
 
   const tabs = [
     { id: "sales" as const, label: "Penjualan", icon: TrendingUp, color: "green" },
@@ -186,29 +153,17 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        {/* Export Buttons */}
-        <div className="flex gap-2">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={exportToPDF}
-            disabled={isLoading}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 disabled:opacity-50 transition-colors"
-          >
-            <Download className="w-4 h-4" />
-            PDF
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={exportToExcel}
-            disabled={isLoading}
-            className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-xl font-medium hover:bg-green-600 disabled:opacity-50 transition-colors"
-          >
-            <Download className="w-4 h-4" />
-            Excel
-          </motion.button>
-        </div>
+        {/* Export Button - PDF Only */}
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={exportToPDF}
+          disabled={isLoading}
+          className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 disabled:opacity-50 transition-colors"
+        >
+          <Download className="w-4 h-4" />
+          Export PDF
+        </motion.button>
       </div>
 
       {/* Date Filter */}
@@ -242,8 +197,8 @@ export default function ReportsPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 font-medium transition-all relative ${activeTab === tab.id
-                  ? "text-violet-600"
-                  : "text-gray-500 hover:text-gray-700"
+                ? "text-violet-600"
+                : "text-gray-500 hover:text-gray-700"
                 }`}
             >
               <tab.icon className="w-5 h-5" />
@@ -289,7 +244,7 @@ export default function ReportsPage() {
               </div>
 
               {/* Summary Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
                 <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
                   <p className="text-sm text-gray-500 mb-1">Total Omzet</p>
                   <p className="text-2xl font-bold text-green-600">{formatCurrency(salesData.total_omzet)}</p>
@@ -301,6 +256,11 @@ export default function ReportsPage() {
                 <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
                   <p className="text-sm text-gray-500 mb-1">Rata-rata Harian</p>
                   <p className="text-2xl font-bold text-blue-600">{formatCurrency(salesData.rata_rata_harian)}</p>
+                </div>
+                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200">
+                  <p className="text-sm text-emerald-600 mb-1">Laba Bersih</p>
+                  <p className="text-2xl font-bold text-emerald-600">{formatCurrency(profitData?.total_laba || 0)}</p>
+                  <p className="text-xs text-emerald-500 mt-1">Keuntungan ✨</p>
                 </div>
                 <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
                   <p className="text-sm text-gray-500 mb-1">Hari Terbaik</p>
@@ -519,10 +479,10 @@ export default function ReportsPage() {
                           <td className="px-4 py-3 text-sm text-right font-semibold text-green-600">{formatCurrency(item.potensial_laba)}</td>
                           <td className="px-4 py-3 text-center">
                             <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${item.status === "habis"
-                                ? "bg-red-100 text-red-700"
-                                : item.status === "menipis"
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : "bg-green-100 text-green-700"
+                              ? "bg-red-100 text-red-700"
+                              : item.status === "menipis"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-green-100 text-green-700"
                               }`}>
                               {item.status === "habis" ? (
                                 <><AlertTriangle className="w-3 h-3" /> Habis</>

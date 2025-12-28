@@ -3,6 +3,7 @@ package dashboard
 import (
 	"net/http"
 
+	"github.com/abrizamstore/database/entities"
 	"github.com/abrizamstore/package/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -22,7 +23,10 @@ func NewHandler(service Service) Handler {
 }
 
 func (h *handler) GetSummary(c *gin.Context) {
-	summary, err := h.service.GetSummary()
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
+
+	summary, err := h.service.GetSummary(user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to get dashboard summary", err.Error(), utils.EmptyObj{})
 		c.JSON(http.StatusInternalServerError, res)
@@ -34,7 +38,10 @@ func (h *handler) GetSummary(c *gin.Context) {
 }
 
 func (h *handler) GetTopProducts(c *gin.Context) {
-	topProducts, err := h.service.GetTopProducts()
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
+
+	topProducts, err := h.service.GetTopProducts(user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to get top products", err.Error(), utils.EmptyObj{})
 		c.JSON(http.StatusInternalServerError, res)
@@ -46,7 +53,10 @@ func (h *handler) GetTopProducts(c *gin.Context) {
 }
 
 func (h *handler) GetSalesTrend(c *gin.Context) {
-	trend, err := h.service.GetSalesTrend()
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
+
+	trend, err := h.service.GetSalesTrend(user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to get sales trend", err.Error(), utils.EmptyObj{})
 		c.JSON(http.StatusInternalServerError, res)

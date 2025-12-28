@@ -2,6 +2,7 @@
 package kategori
 
 import (
+	"github.com/abrizamstore/database/entities"
 	"github.com/abrizamstore/package/dto"
 	"github.com/abrizamstore/package/utils"
 	"github.com/gin-gonic/gin"
@@ -32,7 +33,10 @@ func (h *handler) Create(c *gin.Context) {
 		return
 	}
 
-	kategoriBaru, err := h.service.Create(kategoriInput)
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
+
+	kategoriBaru, err := h.service.Create(kategoriInput, user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to create kategori", err.Error(), utils.EmptyObj{})
 		c.JSON(500, res)
@@ -46,6 +50,9 @@ func (h *handler) Create(c *gin.Context) {
 func (h *handler) GetAll(c *gin.Context) {
 	limitStr := c.DefaultQuery("limit", "10")
 	offsetStr := c.DefaultQuery("offset", "0")
+
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
 
 	limit, err := utils.StringToInt(limitStr)
 	if err != nil {
@@ -61,14 +68,14 @@ func (h *handler) GetAll(c *gin.Context) {
 		return
 	}
 
-	kategoris, total, err := h.service.GetAll(limit, offset)
+	kategoris, total, err := h.service.GetAll(limit, offset, user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to retrieve kategoris", err.Error(), utils.EmptyObj{})
 		c.JSON(500, res)
 		return
 	}
 
-	data := gin.H{
+	data := map[string]interface{}{
 		"kategoris": kategoris,
 		"total":     total,
 	}
@@ -86,7 +93,10 @@ func (h *handler) GetByID(c *gin.Context) {
 		return
 	}
 
-	kategori, err := h.service.GetByID(uint(id))
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
+
+	kategori, err := h.service.GetByID(uint(id), user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to retrieve kategori", err.Error(), utils.EmptyObj{})
 		c.JSON(500, res)
@@ -114,7 +124,10 @@ func (h *handler) Update(c *gin.Context) {
 		return
 	}
 
-	updatedKategori, err := h.service.Update(uint(id), kategoriInput)
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
+
+	updatedKategori, err := h.service.Update(uint(id), kategoriInput, user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to update kategori", err.Error(), utils.EmptyObj{})
 		c.JSON(500, res)
@@ -140,7 +153,10 @@ func (h *handler) Delete(c *gin.Context) {
 		return
 	}
 
-	err = h.service.Delete(uint(id))
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
+
+	err = h.service.Delete(uint(id), user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to delete kategori", err.Error(), utils.EmptyObj{})
 		c.JSON(500, res)

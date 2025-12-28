@@ -11,13 +11,13 @@ type repository struct {
 
 type Repository interface {
 	Create(produk *entities.Produk) error
-	FindAll(limit int, offset int) ([]entities.Produk, int64, error)
-	FindAllWithFilter(limit int, offset int, kategoriId *uint) ([]entities.Produk, int64, error)
-	FindByID(ID uint) (*entities.Produk, error)
-	FindByName(name string, limit int, offset int) (*[]entities.Produk, int64, error)
-	FindLowStock(stokThreshold int) ([]entities.Produk, int64, error)
-	Update(ID uint, produk entities.Produk) (*entities.Produk, error)
-	Delete(ID uint) error
+	FindAll(limit int, offset int, userID uint) ([]entities.Produk, int64, error)
+	FindAllWithFilter(limit int, offset int, kategoriId *uint, userID uint) ([]entities.Produk, int64, error)
+	FindByID(ID uint, userID uint) (*entities.Produk, error)
+	FindByName(name string, limit int, offset int, userID uint) (*[]entities.Produk, int64, error)
+	FindLowStock(stokThreshold int, userID uint) ([]entities.Produk, int64, error)
+	Update(ID uint, produk entities.Produk, userID uint) (*entities.Produk, error)
+	Delete(ID uint, userID uint) error
 }
 
 func NewRepository(db *gorm.DB) Repository {
@@ -33,11 +33,11 @@ func (r *repository) Create(produk *entities.Produk) error {
 	return nil
 }
 
-func (r *repository) FindAll(limit int, offset int) ([]entities.Produk, int64, error) {
+func (r *repository) FindAll(limit int, offset int, userID uint) ([]entities.Produk, int64, error) {
 	var produks []entities.Produk
 	var total int64
 
-	query := r.db.Model(&entities.Produk{})
+	query := r.db.Model(&entities.Produk{}).Where("id_user = ?", userID)
 	query = query.Preload("Kategori")
 	query.Count(&total)
 
@@ -49,11 +49,11 @@ func (r *repository) FindAll(limit int, offset int) ([]entities.Produk, int64, e
 	return produks, total, nil
 }
 
-func (r *repository) FindAllWithFilter(limit int, offset int, kategoriId *uint) ([]entities.Produk, int64, error) {
+func (r *repository) FindAllWithFilter(limit int, offset int, kategoriId *uint, userID uint) ([]entities.Produk, int64, error) {
 	var produks []entities.Produk
 	var total int64
 
-	query := r.db.Model(&entities.Produk{})
+	query := r.db.Model(&entities.Produk{}).Where("id_user = ?", userID)
 	query = query.Preload("Kategori")
 
 	// Filter by category if provided
@@ -71,9 +71,9 @@ func (r *repository) FindAllWithFilter(limit int, offset int, kategoriId *uint) 
 	return produks, total, nil
 }
 
-func (r *repository) FindByID(ID uint) (*entities.Produk, error) {
+func (r *repository) FindByID(ID uint, userID uint) (*entities.Produk, error) {
 	var produk entities.Produk
-	err := r.db.Preload("Kategori").First(&produk, ID).Error
+	err := r.db.Preload("Kategori").Where("id_user = ?", userID).First(&produk, ID).Error
 	if err != nil {
 		return nil, err
 	}
@@ -81,11 +81,11 @@ func (r *repository) FindByID(ID uint) (*entities.Produk, error) {
 	return &produk, nil
 }
 
-func (r *repository) FindByName(name string, limit int, offset int) (*[]entities.Produk, int64, error) {
+func (r *repository) FindByName(name string, limit int, offset int, userID uint) (*[]entities.Produk, int64, error) {
 	var produks []entities.Produk
 	var total int64
 
-	query := r.db.Model(&entities.Produk{}).Where("nama_produk ILIKE ?", "%"+name+"%")
+	query := r.db.Model(&entities.Produk{}).Where("id_user = ? AND nama_produk ILIKE ?", userID, "%"+name+"%")
 	query.Count(&total)
 
 	err := query.Preload("Kategori").Limit(limit).Offset(offset).Find(&produks).Error
@@ -96,16 +96,16 @@ func (r *repository) FindByName(name string, limit int, offset int) (*[]entities
 	return &produks, total, nil
 }
 
-func (r *repository) Update(ID uint, produk entities.Produk) (*entities.Produk, error) {
-	err := r.db.Model(&entities.Produk{}).Where("id = ?", ID).Updates(produk).Error
+func (r *repository) Update(ID uint, produk entities.Produk, userID uint) (*entities.Produk, error) {
+	err := r.db.Model(&entities.Produk{}).Where("id = ? AND id_user = ?", ID, userID).Updates(produk).Error
 	if err != nil {
 		return nil, err
 	}
 	return &produk, nil
 }
 
-func (r *repository) Delete(ID uint) error {
-	err := r.db.Where("id = ?", ID).Delete(&entities.Produk{}).Error
+func (r *repository) Delete(ID uint, userID uint) error {
+	err := r.db.Where("id = ? AND id_user = ?", ID, userID).Delete(&entities.Produk{}).Error
 	if err != nil {
 		return err
 	}
@@ -113,13 +113,13 @@ func (r *repository) Delete(ID uint) error {
 	return nil
 }
 
-func (r *repository) FindLowStock(stokThreshold int) ([]entities.Produk, int64, error) {
+func (r *repository) FindLowStock(stokThreshold int, userID uint) ([]entities.Produk, int64, error) {
 	var produks []entities.Produk
 	var total int64
 
 	query := r.db.Model(&entities.Produk{}).
 		Preload("Kategori").
-		Where("stok <= ?", stokThreshold)
+		Where("id_user = ? AND stok <= ?", userID, stokThreshold)
 
 	query.Count(&total)
 

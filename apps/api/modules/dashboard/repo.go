@@ -9,9 +9,9 @@ import (
 )
 
 type Repository interface {
-	GetSummary(todayStart, weekStart, monthStart time.Time) (*dto.SummaryResponse, error)
-	GetTopSellingProducts(limit int) (*[]dto.TopProductResponse, error)
-	GetSalesTrend(days int) (*[]dto.SalesTrendItem, error)
+	GetSummary(todayStart, weekStart, monthStart time.Time, userID uint) (*dto.SummaryResponse, error)
+	GetTopSellingProducts(limit int, userID uint) (*[]dto.TopProductResponse, error)
+	GetSalesTrend(days int, userID uint) (*[]dto.SalesTrendItem, error)
 }
 
 type repository struct {
@@ -22,17 +22,17 @@ func NewRepository(db *gorm.DB) Repository {
 	return &repository{db: db}
 }
 
-func (r *repository) GetSummary(todayStart, weekStart, monthStart time.Time) (*dto.SummaryResponse, error) {
+func (r *repository) GetSummary(todayStart, weekStart, monthStart time.Time, userID uint) (*dto.SummaryResponse, error) {
 	var summary dto.SummaryResponse
 
-	// Today's data
+	// Today's data - filter by user
 	var todayData struct {
 		TotalOmzet     int64
 		TotalTransaksi int64
 	}
 	err := r.db.Model(&entities.Penjualan{}).
 		Select("COALESCE(SUM(total_penjualan), 0) as total_omzet, COUNT(id) as total_transaksi").
-		Where("created_at >= ?", todayStart).
+		Where("id_user = ? AND created_at >= ?", userID, todayStart).
 		Scan(&todayData).Error
 	if err != nil {
 		return nil, err
@@ -40,14 +40,14 @@ func (r *repository) GetSummary(todayStart, weekStart, monthStart time.Time) (*d
 	summary.TodayOmzet = todayData.TotalOmzet
 	summary.TodayTransaksi = todayData.TotalTransaksi
 
-	// Weekly data
+	// Weekly data - filter by user
 	var weeklyData struct {
 		TotalOmzet     int64
 		TotalTransaksi int64
 	}
 	err = r.db.Model(&entities.Penjualan{}).
 		Select("COALESCE(SUM(total_penjualan), 0) as total_omzet, COUNT(id) as total_transaksi").
-		Where("created_at >= ?", weekStart).
+		Where("id_user = ? AND created_at >= ?", userID, weekStart).
 		Scan(&weeklyData).Error
 	if err != nil {
 		return nil, err
@@ -55,14 +55,14 @@ func (r *repository) GetSummary(todayStart, weekStart, monthStart time.Time) (*d
 	summary.WeeklyOmzet = weeklyData.TotalOmzet
 	summary.WeeklyTransaksi = weeklyData.TotalTransaksi
 
-	// Monthly data
+	// Monthly data - filter by user
 	var monthlyData struct {
 		TotalOmzet     int64
 		TotalTransaksi int64
 	}
 	err = r.db.Model(&entities.Penjualan{}).
 		Select("COALESCE(SUM(total_penjualan), 0) as total_omzet, COUNT(id) as total_transaksi").
-		Where("created_at >= ?", monthStart).
+		Where("id_user = ? AND created_at >= ?", userID, monthStart).
 		Scan(&monthlyData).Error
 	if err != nil {
 		return nil, err
@@ -73,12 +73,15 @@ func (r *repository) GetSummary(todayStart, weekStart, monthStart time.Time) (*d
 	return &summary, nil
 }
 
-func (r *repository) GetTopSellingProducts(limit int) (*[]dto.TopProductResponse, error) {
+func (r *repository) GetTopSellingProducts(limit int, userID uint) (*[]dto.TopProductResponse, error) {
 	var topProducts []dto.TopProductResponse
 
+	// Filter by user's products via penjualan
 	err := r.db.Model(&entities.Detail_Penjualan{}).
 		Select("p.nama_produk, SUM(detail_penjualans.jumlah) as total_terjual").
-		Joins("left join produks p on p.id = detail_penjualans.id_produk").
+		Joins("LEFT JOIN produks p ON p.id = detail_penjualans.id_produk").
+		Joins("LEFT JOIN penjualans pj ON pj.id = detail_penjualans.id_penjualan").
+		Where("pj.id_user = ?", userID).
 		Group("p.nama_produk").
 		Order("total_terjual desc").
 		Limit(limit).
@@ -90,12 +93,13 @@ func (r *repository) GetTopSellingProducts(limit int) (*[]dto.TopProductResponse
 	return &topProducts, nil
 }
 
-func (r *repository) GetSalesTrend(days int) (*[]dto.SalesTrendItem, error) {
+func (r *repository) GetSalesTrend(days int, userID uint) (*[]dto.SalesTrendItem, error) {
 	var trend []dto.SalesTrendItem
 
+	// Filter by user
 	err := r.db.Model(&entities.Penjualan{}).
 		Select("DATE(created_at) as date, COALESCE(SUM(total_penjualan), 0) as total_omzet").
-		Where("created_at >= ?", time.Now().AddDate(0, 0, -days)).
+		Where("id_user = ? AND created_at >= ?", userID, time.Now().AddDate(0, 0, -days)).
 		Group("DATE(created_at)").
 		Order("date ASC").
 		Scan(&trend).Error

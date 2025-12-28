@@ -10,21 +10,21 @@ type service struct {
 }
 
 type Service interface {
-	Create(produk dto.ProdukCreate) (*entities.Produk, error)
-	GetAll(limit int, offset int) ([]entities.Produk, int64, error)
-	GetAllWithFilter(limit int, offset int, kategoriId *uint) ([]entities.Produk, int64, error)
-	GetByID(ID uint) (*entities.Produk, error)
-	GetByName(name string, limit int, offset int) (*[]entities.Produk, int64, error)
-	GetLowStock() ([]entities.Produk, int64, error)
-	Update(ID uint, produk dto.ProdukCreate) (*entities.Produk, error)
-	Delete(ID uint) error
+	Create(produk dto.ProdukCreate, userID uint) (*entities.Produk, error)
+	GetAll(limit int, offset int, userID uint) ([]entities.Produk, int64, error)
+	GetAllWithFilter(limit int, offset int, kategoriId *uint, userID uint) ([]entities.Produk, int64, error)
+	GetByID(ID uint, userID uint) (*entities.Produk, error)
+	GetByName(name string, limit int, offset int, userID uint) (*[]entities.Produk, int64, error)
+	GetLowStock(userID uint) ([]entities.Produk, int64, error)
+	Update(ID uint, produk dto.ProdukCreate, userID uint) (*entities.Produk, error)
+	Delete(ID uint, userID uint) error
 }
 
 func NewService(repository Repository) Service {
 	return &service{repository: repository}
 }
 
-func (s *service) Create(produk dto.ProdukCreate) (*entities.Produk, error) {
+func (s *service) Create(produk dto.ProdukCreate, userID uint) (*entities.Produk, error) {
 	produkBaru := &entities.Produk{
 		Nama_Produk: produk.Nama_Produk,
 		Harga_Beli:  produk.Harga_Beli,
@@ -32,6 +32,7 @@ func (s *service) Create(produk dto.ProdukCreate) (*entities.Produk, error) {
 		Stok:        produk.Stok,
 		ID_Kategori: produk.ID_Kategori,
 		Foto_Produk: produk.Foto_Produk,
+		ID_User:     &userID,
 	}
 
 	err := s.repository.Create(produkBaru)
@@ -42,8 +43,8 @@ func (s *service) Create(produk dto.ProdukCreate) (*entities.Produk, error) {
 	return produkBaru, nil
 }
 
-func (s *service) GetAll(limit int, offset int) ([]entities.Produk, int64, error) {
-	produks, total, err := s.repository.FindAll(limit, offset)
+func (s *service) GetAll(limit int, offset int, userID uint) ([]entities.Produk, int64, error) {
+	produks, total, err := s.repository.FindAll(limit, offset, userID)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -51,8 +52,8 @@ func (s *service) GetAll(limit int, offset int) ([]entities.Produk, int64, error
 	return produks, total, nil
 }
 
-func (s *service) GetAllWithFilter(limit int, offset int, kategoriId *uint) ([]entities.Produk, int64, error) {
-	produks, total, err := s.repository.FindAllWithFilter(limit, offset, kategoriId)
+func (s *service) GetAllWithFilter(limit int, offset int, kategoriId *uint, userID uint) ([]entities.Produk, int64, error) {
+	produks, total, err := s.repository.FindAllWithFilter(limit, offset, kategoriId, userID)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -60,8 +61,8 @@ func (s *service) GetAllWithFilter(limit int, offset int, kategoriId *uint) ([]e
 	return produks, total, nil
 }
 
-func (s *service) GetByID(ID uint) (*entities.Produk, error) {
-	produk, err := s.repository.FindByID(ID)
+func (s *service) GetByID(ID uint, userID uint) (*entities.Produk, error) {
+	produk, err := s.repository.FindByID(ID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -69,8 +70,8 @@ func (s *service) GetByID(ID uint) (*entities.Produk, error) {
 	return produk, nil
 }
 
-func (s *service) GetByName(name string, limit int, offset int) (*[]entities.Produk, int64, error) {
-	produks, total, err := s.repository.FindByName(name, limit, offset)
+func (s *service) GetByName(name string, limit int, offset int, userID uint) (*[]entities.Produk, int64, error) {
+	produks, total, err := s.repository.FindByName(name, limit, offset, userID)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -78,8 +79,8 @@ func (s *service) GetByName(name string, limit int, offset int) (*[]entities.Pro
 	return produks, total, nil
 }
 
-func (s *service) Update(ID uint, produk dto.ProdukCreate) (*entities.Produk, error) {
-	produkExist, err := s.repository.FindByID(ID)
+func (s *service) Update(ID uint, produk dto.ProdukCreate, userID uint) (*entities.Produk, error) {
+	produkExist, err := s.repository.FindByID(ID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +96,7 @@ func (s *service) Update(ID uint, produk dto.ProdukCreate) (*entities.Produk, er
 		ID_Kategori: produk.ID_Kategori,
 	}
 
-	updatedProduk, err := s.repository.Update(ID, produkUpdate)
+	updatedProduk, err := s.repository.Update(ID, produkUpdate, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -103,8 +104,8 @@ func (s *service) Update(ID uint, produk dto.ProdukCreate) (*entities.Produk, er
 	return updatedProduk, nil
 }
 
-func (s *service) Delete(ID uint) error {
-	err := s.repository.Delete(ID)
+func (s *service) Delete(ID uint, userID uint) error {
+	err := s.repository.Delete(ID, userID)
 	if err != nil {
 		return err
 	}
@@ -112,10 +113,10 @@ func (s *service) Delete(ID uint) error {
 	return nil
 }
 
-func (s *service) GetLowStock() ([]entities.Produk, int64, error) {
+func (s *service) GetLowStock(userID uint) ([]entities.Produk, int64, error) {
 	stokThreshold := 10
 
-	produks, total, err := s.repository.FindLowStock(stokThreshold)
+	produks, total, err := s.repository.FindLowStock(stokThreshold, userID)
 	if err != nil {
 		return nil, 0, err
 	}

@@ -79,3 +79,22 @@ export interface Pembelian {
   id_user: number;
   DetailPembelian?: DetailPembelian[];
 }
+
+// User Profile
+export interface User {
+  ID: number;
+  CreatedAt: string;
+  UpdatedAt: string;
+  name: string;
+  email: string;
+  role: string;
+  profile_image?: string;
+  is_verified: boolean;
+}
+
+export interface UpdateProfilePayload {
+  name?: string;
+  email?: string;
+  password?: string;
+  profile_image?: string;
+}

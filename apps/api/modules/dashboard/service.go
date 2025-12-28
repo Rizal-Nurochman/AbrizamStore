@@ -7,9 +7,9 @@ import (
 )
 
 type Service interface {
-	GetSummary() (*dto.SummaryResponse, error)
-	GetTopProducts() (*[]dto.TopProductResponse, error)
-	GetSalesTrend() (*[]dto.SalesTrendItem, error)
+	GetSummary(userID uint) (*dto.SummaryResponse, error)
+	GetTopProducts(userID uint) (*[]dto.TopProductResponse, error)
+	GetSalesTrend(userID uint) (*[]dto.SalesTrendItem, error)
 }
 
 type service struct {
@@ -20,7 +20,7 @@ func NewService(r Repository) Service {
 	return &service{repository: r}
 }
 
-func (s *service) GetSummary() (*dto.SummaryResponse, error) {
+func (s *service) GetSummary(userID uint) (*dto.SummaryResponse, error) {
 	now := time.Now()
 	todayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 
@@ -34,13 +34,13 @@ func (s *service) GetSummary() (*dto.SummaryResponse, error) {
 	// Get start of month
 	monthStart := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 
-	return s.repository.GetSummary(todayStart, weekStart, monthStart)
+	return s.repository.GetSummary(todayStart, weekStart, monthStart, userID)
 }
 
-func (s *service) GetTopProducts() (*[]dto.TopProductResponse, error) {
-	return s.repository.GetTopSellingProducts(5)
+func (s *service) GetTopProducts(userID uint) (*[]dto.TopProductResponse, error) {
+	return s.repository.GetTopSellingProducts(5, userID)
 }
 
-func (s *service) GetSalesTrend() (*[]dto.SalesTrendItem, error) {
-	return s.repository.GetSalesTrend(7) // Last 7 days
+func (s *service) GetSalesTrend(userID uint) (*[]dto.SalesTrendItem, error) {
+	return s.repository.GetSalesTrend(7, userID) // Last 7 days
 }

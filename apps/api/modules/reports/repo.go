@@ -9,9 +9,9 @@ import (
 )
 
 type Repository interface {
-	GetSalesReport(startDate, endDate time.Time) (*dto.SalesReportResponse, error)
-	GetProfitLossReport(startDate, endDate time.Time) (*dto.ProfitLossResponse, error)
-	GetStockReport() (*dto.StockReportResponse, error)
+	GetSalesReport(startDate, endDate time.Time, userID uint) (*dto.SalesReportResponse, error)
+	GetProfitLossReport(startDate, endDate time.Time, userID uint) (*dto.ProfitLossResponse, error)
+	GetStockReport(userID uint) (*dto.StockReportResponse, error)
 }
 
 type repository struct {
@@ -22,13 +22,13 @@ func NewRepository(db *gorm.DB) Repository {
 	return &repository{db: db}
 }
 
-func (r *repository) GetSalesReport(startDate, endDate time.Time) (*dto.SalesReportResponse, error) {
+func (r *repository) GetSalesReport(startDate, endDate time.Time, userID uint) (*dto.SalesReportResponse, error) {
 	var items []dto.SalesReportItem
 
-	// Get daily sales summary
+	// Get daily sales summary - filter by user's penjualan
 	err := r.db.Model(&entities.Penjualan{}).
 		Select("id, created_at as tanggal, total_penjualan, (SELECT COUNT(*) FROM detail_penjualans WHERE detail_penjualans.id_penjualan = penjualans.id) as jumlah_item").
-		Where("created_at >= ? AND created_at <= ?", startDate, endDate).
+		Where("id_user = ? AND created_at >= ? AND created_at <= ?", userID, startDate, endDate).
 		Order("created_at DESC").
 		Scan(&items).Error
 	if err != nil {
@@ -74,10 +74,10 @@ func (r *repository) GetSalesReport(startDate, endDate time.Time) (*dto.SalesRep
 	}, nil
 }
 
-func (r *repository) GetProfitLossReport(startDate, endDate time.Time) (*dto.ProfitLossResponse, error) {
+func (r *repository) GetProfitLossReport(startDate, endDate time.Time, userID uint) (*dto.ProfitLossResponse, error) {
 	var items []dto.ProfitLossItem
 
-	// Get profit per product
+	// Get profit per product - filter by user's products
 	err := r.db.Model(&entities.Detail_Penjualan{}).
 		Select(`
 			p.nama_produk,
@@ -90,7 +90,7 @@ func (r *repository) GetProfitLossReport(startDate, endDate time.Time) (*dto.Pro
 		`).
 		Joins("LEFT JOIN produks p ON p.id = detail_penjualans.id_produk").
 		Joins("LEFT JOIN penjualans pj ON pj.id = detail_penjualans.id_penjualan").
-		Where("pj.created_at >= ? AND pj.created_at <= ?", startDate, endDate).
+		Where("pj.id_user = ? AND pj.created_at >= ? AND pj.created_at <= ?", userID, startDate, endDate).
 		Group("p.id, p.nama_produk, p.harga_beli, detail_penjualans.harga_jual").
 		Order("laba DESC").
 		Scan(&items).Error
@@ -129,9 +129,10 @@ func (r *repository) GetProfitLossReport(startDate, endDate time.Time) (*dto.Pro
 	}, nil
 }
 
-func (r *repository) GetStockReport() (*dto.StockReportResponse, error) {
+func (r *repository) GetStockReport(userID uint) (*dto.StockReportResponse, error) {
 	var items []dto.StockReportItem
 
+	// Filter by user's products
 	err := r.db.Model(&entities.Produk{}).
 		Select(`
 			produks.id,
@@ -150,6 +151,7 @@ func (r *repository) GetStockReport() (*dto.StockReportResponse, error) {
 			END as status
 		`).
 		Joins("LEFT JOIN kategoris k ON k.id = produks.id_kategori").
+		Where("produks.id_user = ?", userID).
 		Order("produks.stok ASC").
 		Scan(&items).Error
 	if err != nil {

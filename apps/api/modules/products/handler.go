@@ -29,11 +29,15 @@ func (h *handler) Create(c *gin.Context) {
 	var produkInput dto.ProdukCreate
 	err := c.ShouldBindJSON(&produkInput)
 	if err != nil {
-		utils.BuildResponseFailed("Failed to bind produk input", err.Error(), utils.EmptyObj{})
+		res := utils.BuildResponseFailed("Failed to bind produk input", err.Error(), utils.EmptyObj{})
+		c.JSON(400, res)
 		return
 	}
 
-	produkBaru, err := h.service.Create(produkInput)
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
+
+	produkBaru, err := h.service.Create(produkInput, user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to create produk", err.Error(), utils.EmptyObj{})
 		c.JSON(500, res)
@@ -49,6 +53,9 @@ func (h *handler) GetAll(c *gin.Context) {
 	offsetStr := c.DefaultQuery("offset", "0")
 	searchName := c.Query("nama_produk")
 	kategoriIdStr := c.Query("id_kategori")
+
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
 
 	limit, err := utils.StringToInt(limitStr)
 	if err != nil {
@@ -79,14 +86,12 @@ func (h *handler) GetAll(c *gin.Context) {
 
 	if searchName != "" {
 		var produksPtr *[]entities.Produk
-		produksPtr, total, errService = h.service.GetByName(searchName, limit, offset)
+		produksPtr, total, errService = h.service.GetByName(searchName, limit, offset, user.ID)
 		if errService == nil {
-			// 2. Dereference pointer untuk mengisi variabel produks
 			produks = *produksPtr
 		}
-
 	} else {
-		produks, total, errService = h.service.GetAllWithFilter(limit, offset, kategoriId)
+		produks, total, errService = h.service.GetAllWithFilter(limit, offset, kategoriId, user.ID)
 	}
 
 	if errService != nil {
@@ -122,7 +127,10 @@ func (h *handler) GetByID(c *gin.Context) {
 		return
 	}
 
-	produk, err := h.service.GetByID(uint(id))
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
+
+	produk, err := h.service.GetByID(uint(id), user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to retrieve produk", err.Error(), utils.EmptyObj{})
 		c.JSON(500, res)
@@ -138,6 +146,9 @@ func (h *handler) GetByName(c *gin.Context) {
 	limitStr := c.DefaultQuery("limit", "10")
 	offsetStr := c.DefaultQuery("offset", "0")
 
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
+
 	limit, err := utils.StringToInt(limitStr)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to convert limit", err.Error(), utils.EmptyObj{})
@@ -152,7 +163,7 @@ func (h *handler) GetByName(c *gin.Context) {
 		return
 	}
 
-	produks, total, err := h.service.GetByName(name, limit, offset)
+	produks, total, err := h.service.GetByName(name, limit, offset, user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to retrieve produks", err.Error(), utils.EmptyObj{})
 		c.JSON(500, res)
@@ -194,7 +205,10 @@ func (h *handler) Update(c *gin.Context) {
 		return
 	}
 
-	updatedProduk, err := h.service.Update(uint(id), produkInput)
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
+
+	updatedProduk, err := h.service.Update(uint(id), produkInput, user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to update produk", err.Error(), utils.EmptyObj{})
 		c.JSON(500, res)
@@ -220,7 +234,10 @@ func (h *handler) Delete(c *gin.Context) {
 		return
 	}
 
-	err = h.service.Delete(uint(id))
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
+
+	err = h.service.Delete(uint(id), user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to delete produk", err.Error(), utils.EmptyObj{})
 		c.JSON(500, res)
@@ -232,14 +249,17 @@ func (h *handler) Delete(c *gin.Context) {
 }
 
 func (h *handler) GetLowStock(c *gin.Context) {
-	produks, total, err := h.service.GetLowStock()
+	// Get user from context
+	user := c.MustGet("user").(entities.User)
+
+	produks, total, err := h.service.GetLowStock(user.ID)
 	if err != nil {
 		res := utils.BuildResponseFailed("Failed to retrieve low stock produks", err.Error(), utils.EmptyObj{})
 		c.JSON(500, res)
 		return
 	}
 
-	data := gin.H{
+	data := map[string]interface{}{
 		"produks": produks,
 		"total":   total,
 	}
