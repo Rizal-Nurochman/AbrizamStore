@@ -11,6 +11,7 @@ import (
 	"github.com/abrizamstore/modules/pembelian"
 	"github.com/abrizamstore/modules/penjualan"
 	"github.com/abrizamstore/modules/products"
+	"github.com/abrizamstore/modules/reports"
 	"github.com/abrizamstore/modules/user"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -46,6 +47,7 @@ func main() {
 		penjualan.PenjualanRouter(api, DB)
 		pembelian.PembelianRouter(api, DB)
 		dashboard.DashboardRouter(api, DB)
+		reports.ReportsRouter(api, DB)
 	}
 
 	port := os.Getenv("GOLANG_PORT")

@@ -10,6 +10,8 @@ import { CategoryTabs } from "@/components/CategoryTabs";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductDetailModal } from "@/components/ProductDetailModal";
 import { AddProductModal } from "@/components/AddProductModal";
+import { EditProductModal } from "@/components/EditProductModal";
+import { DeleteProductModal } from "@/components/DeleteProductModal";
 import { EmptyState } from "@/components/EmptyState";
 import { Product } from "@/types";
 
@@ -21,8 +23,12 @@ export default function ProductsPage() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 500);
+
+  // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const { data: productsData, isLoading, isError } = useProducts({
@@ -41,14 +47,28 @@ export default function ProductsPage() {
     setIsDetailModalOpen(true);
   };
 
+  const handleEditClick = (product: Product) => {
+    setSelectedProduct(product);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteClick = (product: Product) => {
+    setSelectedProduct(product);
+    setIsDeleteModalOpen(true);
+  };
+
   const handleCategoryChange = (categoryId: number | null) => {
     setSelectedCategoryId(categoryId);
-    setPage(1); // Reset to first page when category changes
+    setPage(1);
   };
 
   const handleLimitChange = (newLimit: number) => {
     setLimit(newLimit);
-    setPage(1); // Reset to first page when limit changes
+    setPage(1);
+  };
+
+  const handleModalSuccess = () => {
+    setSelectedProduct(null);
   };
 
   return (
@@ -182,6 +202,30 @@ export default function ProductsPage() {
           setIsDetailModalOpen(false);
           setSelectedProduct(null);
         }}
+        onEdit={handleEditClick}
+        onDelete={handleDeleteClick}
+      />
+
+      {/* Edit Product Modal */}
+      <EditProductModal
+        product={selectedProduct}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedProduct(null);
+        }}
+        onSuccess={handleModalSuccess}
+      />
+
+      {/* Delete Product Modal */}
+      <DeleteProductModal
+        product={selectedProduct}
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedProduct(null);
+        }}
+        onSuccess={handleModalSuccess}
       />
     </>
   );

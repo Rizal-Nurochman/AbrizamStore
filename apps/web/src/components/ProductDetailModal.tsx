@@ -2,15 +2,17 @@
 
 import { Product } from "@/types";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShoppingBag, Package, Calendar, Tag, Banknote, TrendingUp } from "lucide-react";
+import { X, Package, Calendar, Tag, Banknote, TrendingUp, Edit, Trash2 } from "lucide-react";
 
 interface ProductDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   product: Product | null;
+  onEdit?: (product: Product) => void;
+  onDelete?: (product: Product) => void;
 }
 
-export function ProductDetailModal({ isOpen, onClose, product }: ProductDetailModalProps) {
+export function ProductDetailModal({ isOpen, onClose, product, onEdit, onDelete }: ProductDetailModalProps) {
   // Format currency
   const formatRupiah = (number: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -91,10 +93,10 @@ export function ProductDetailModal({ isOpen, onClose, product }: ProductDetailMo
                 {/* Stock Badge */}
                 <div className="absolute bottom-3 right-3">
                   <span className={`px-2.5 py-1 rounded-full text-xs font-semibold shadow-lg ${product.stok > 10
-                      ? "bg-green-500 text-white"
-                      : product.stok > 0
-                        ? "bg-yellow-500 text-white"
-                        : "bg-red-500 text-white"
+                    ? "bg-green-500 text-white"
+                    : product.stok > 0
+                      ? "bg-yellow-500 text-white"
+                      : "bg-red-500 text-white"
                     }`}>
                     Stok: {product.stok}
                   </span>
@@ -162,13 +164,27 @@ export function ProductDetailModal({ isOpen, onClose, product }: ProductDetailMo
                 </div>
               </div>
 
-              {/* Footer */}
-              <div className="p-3 border-t border-gray-100 bg-gray-50/50">
+              {/* Footer with Actions */}
+              <div className="p-3 border-t border-gray-100 bg-gray-50/50 flex gap-2">
                 <button
-                  onClick={onClose}
-                  className="w-full py-2.5 bg-violet-600 text-white rounded-xl font-semibold hover:bg-violet-700 transition-colors shadow-lg shadow-violet-200 text-sm"
+                  onClick={() => {
+                    onClose();
+                    onDelete?.(product);
+                  }}
+                  className="flex-1 py-2.5 flex items-center justify-center gap-2 bg-white border border-red-200 text-red-600 rounded-xl font-semibold hover:bg-red-50 transition-colors text-sm"
                 >
-                  Tutup
+                  <Trash2 className="w-4 h-4" />
+                  Hapus
+                </button>
+                <button
+                  onClick={() => {
+                    onClose();
+                    onEdit?.(product);
+                  }}
+                  className="flex-1 py-2.5 flex items-center justify-center gap-2 bg-violet-600 text-white rounded-xl font-semibold hover:bg-violet-700 transition-colors shadow-lg shadow-violet-200 text-sm"
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit
                 </button>
               </div>
             </div>
