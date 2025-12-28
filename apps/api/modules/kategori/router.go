@@ -11,15 +11,12 @@ func KategoriRouter(api *gin.RouterGroup, DB *gorm.DB) {
 	kategoriService := NewService(kategoriRepo)
 	kategoriHandler := NewHandler(kategoriService)
 
-	public := api.Group("/kategori")
-	{
-		public.GET("/", kategoriHandler.GetAll)
-		public.GET("/:id", kategoriHandler.GetByID)
-	}
-
+	// All routes now require authentication for multi-tenant data isolation
 	protected := api.Group("/kategori")
 	protected.Use(middleware.RequireAuth(DB))
 	{
+		protected.GET("/", kategoriHandler.GetAll)
+		protected.GET("/:id", kategoriHandler.GetByID)
 		protected.POST("/", middleware.RequireRole("user"), kategoriHandler.Create)
 		protected.PUT("/:id", middleware.RequireRole("user"), kategoriHandler.Update)
 		protected.DELETE("/:id", middleware.RequireRole("user"), kategoriHandler.Delete)

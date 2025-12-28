@@ -13,7 +13,6 @@ func ReportsRouter(api *gin.RouterGroup, DB *gorm.DB) {
 
 	protected := api.Group("/reports")
 	protected.Use(middleware.RequireAuth(DB))
-	protected.Use(middleware.RequireRole("user"))
 	{
 		protected.GET("/sales", reportsHandler.GetSalesReport)
 		protected.GET("/profit-loss", reportsHandler.GetProfitLossReport)

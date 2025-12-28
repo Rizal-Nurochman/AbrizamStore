@@ -11,16 +11,13 @@ func ProdukRouter(api *gin.RouterGroup, DB *gorm.DB) {
 	produkService := NewService(produkRepo)
 	produkHandler := NewHandler(produkService)
 
-	public := api.Group("/products")
-	{
-		public.GET("/", produkHandler.GetAll)
-		public.GET("/:id", produkHandler.GetByID)
-		public.GET("/low-stock", produkHandler.GetLowStock)
-	}
-
+	// All routes now require authentication for multi-tenant data isolation
 	protected := api.Group("/products")
 	protected.Use(middleware.RequireAuth(DB))
 	{
+		protected.GET("/", produkHandler.GetAll)
+		protected.GET("/:id", produkHandler.GetByID)
+		protected.GET("/low-stock", produkHandler.GetLowStock)
 		protected.POST("/", middleware.RequireRole("user"), produkHandler.Create)
 		protected.PUT("/:id", middleware.RequireRole("user"), produkHandler.Update)
 		protected.DELETE("/:id", middleware.RequireRole("user"), produkHandler.Delete)

@@ -79,7 +79,7 @@ export default function RegisterPage() {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
       toast.success("Google Login successful!");
-      router.push("/");
+      router.push("/dashboard");
     },
     onError: (error: unknown) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

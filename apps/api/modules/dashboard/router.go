@@ -13,7 +13,6 @@ func DashboardRouter(api *gin.RouterGroup, DB *gorm.DB) {
 
 	protected := api.Group("/dashboard")
 	protected.Use(middleware.RequireAuth(DB))
-	protected.Use(middleware.RequireRole("user"))
 	{
 		protected.GET("/summary", dashboardHandler.GetSummary)
 		protected.GET("/top-products", dashboardHandler.GetTopProducts)

@@ -80,7 +80,7 @@ export default function ReportsPage() {
       autoTable(doc, {
         startY: 70,
         head: [["No", "Tanggal", "Jumlah Item", "Total Penjualan"]],
-        body: salesData.items.map((item, index) => [
+        body: salesData.items?.map((item, index) => [
           index + 1,
           formatDate(item.tanggal),
           item.jumlah_item,
@@ -101,7 +101,7 @@ export default function ReportsPage() {
       autoTable(doc, {
         startY: 45,
         head: [["Produk", "Terjual", "Modal", "Penjualan", "Laba"]],
-        body: profitData.items.map((item) => [
+        body: profitData.items?.map((item) => [
           item.nama_produk,
           item.jumlah_terjual,
           formatCurrency(item.total_modal),
@@ -117,7 +117,7 @@ export default function ReportsPage() {
       autoTable(doc, {
         startY: 45,
         head: [["Produk", "Stok", "Nilai Modal", "Nilai Jual", "Potensial Laba", "Status"]],
-        body: stockData.items.map((item) => [
+        body: stockData.items?.map((item) => [
           item.nama_produk,
           item.stok,
           formatCurrency(item.nilai_modal),
@@ -281,7 +281,7 @@ export default function ReportsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {salesData.items.map((item, index) => (
+                      {salesData.items?.map((item, index) => (
                         <tr key={item.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                           <td className="px-4 py-3 text-sm text-gray-900">{formatDate(item.tanggal)}</td>
                           <td className="px-4 py-3 text-sm text-center text-gray-600">{item.jumlah_item}</td>
@@ -369,7 +369,7 @@ export default function ReportsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {profitData.items.map((item, index) => (
+                      {profitData.items?.map((item, index) => (
                         <tr key={item.nama_produk} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                           <td className="px-4 py-3 text-sm font-medium text-gray-900">{item.nama_produk}</td>
                           <td className="px-4 py-3 text-sm text-center text-gray-600">{item.jumlah_terjual}</td>
@@ -467,7 +467,7 @@ export default function ReportsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {stockData.items.map((item, index) => (
+                      {stockData.items?.map((item, index) => (
                         <tr key={item.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                           <td className="px-4 py-3">
                             <p className="text-sm font-medium text-gray-900">{item.nama_produk}</p>
