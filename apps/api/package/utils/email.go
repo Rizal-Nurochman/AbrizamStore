@@ -1,33 +1,70 @@
 package utils
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"math/rand"
+	"net/http"
 	"os"
 	"strconv"
-
-	"gopkg.in/gomail.v2"
 )
 
+type brevoEmailRequest struct {
+	Sender      brevoContact   `json:"sender"`
+	To          []brevoContact `json:"to"`
+	Subject     string         `json:"subject"`
+	HTMLContent string         `json:"htmlContent"`
+}
+
+type brevoContact struct {
+	Name  string `json:"name,omitempty"`
+	Email string `json:"email"`
+}
+
 func SendEmail(to string, subject string, body string) error {
-	smtpHost := os.Getenv("SMTP_HOST")
-	smtpPortStr := os.Getenv("SMTP_PORT")
-	smtpEmail := os.Getenv("SMTP_AUTH_EMAIL")
-	smtpPassword := os.Getenv("SMTP_AUTH_PASSWORD")
-	smtpSenderName := os.Getenv("SMTP_SENDER_NAME")
+	apiKey := os.Getenv("BREVO_API_KEY")
+	senderEmail := os.Getenv("BREVO_SENDER_EMAIL")
+	senderName := os.Getenv("BREVO_SENDER_NAME")
 
-	smtpPort, _ := strconv.Atoi(smtpPortStr)
+	if senderName == "" {
+		senderName = "Warungku"
+	}
 
-	m := gomail.NewMessage()
-	m.SetHeader("From", smtpSenderName)
-	m.SetHeader("To", to)
-	m.SetHeader("Subject", subject)
-	// No change needed as it is already text/html
-	m.SetBody("text/html", body)
+	emailData := brevoEmailRequest{
+		Sender: brevoContact{
+			Name:  senderName,
+			Email: senderEmail,
+		},
+		To: []brevoContact{
+			{Email: to},
+		},
+		Subject:     subject,
+		HTMLContent: body,
+	}
 
-	d := gomail.NewDialer(smtpHost, smtpPort, smtpEmail, smtpPassword)
-
-	if err := d.DialAndSend(m); err != nil {
+	jsonData, err := json.Marshal(emailData)
+	if err != nil {
 		return err
+	}
+
+	req, err := http.NewRequest("POST", "https://api.brevo.com/v3/smtp/email", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("api-key", apiKey)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf("brevo API error: status %d", resp.StatusCode)
 	}
 
 	return nil
