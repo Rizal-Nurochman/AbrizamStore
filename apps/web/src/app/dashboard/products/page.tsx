@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Search, Package, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useDebounce } from "use-debounce";
 import { useProducts } from "@/hooks/useProducts";
-import { useCategories } from "@/hooks/useCategories";
 import { CategoryTabs } from "@/components/CategoryTabs";
 import { ProductCard } from "@/components/ProductCard";
 import { ProductDetailModal } from "@/components/ProductDetailModal";
@@ -39,8 +38,6 @@ export default function ProductsPage() {
   });
   const products = productsData?.data || [];
   const totalPages = productsData?.meta?.total_page || 1;
-
-  const { data: categories = [], isLoading: isLoadingCategories } = useCategories();
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
@@ -109,15 +106,12 @@ export default function ProductsPage() {
       </div>
 
       {/* Category Tabs */}
-      {!isLoadingCategories && categories.length > 0 && (
-        <div className="mb-6">
-          <CategoryTabs
-            categories={categories}
-            activeCategoryId={selectedCategoryId}
-            onSelectCategory={handleCategoryChange}
-          />
-        </div>
-      )}
+      <div className="mb-6">
+        <CategoryTabs
+          activeCategoryId={selectedCategoryId}
+          onSelectCategory={handleCategoryChange}
+        />
+      </div>
 
       {/* Products Grid */}
       {isLoading ? (
@@ -129,7 +123,7 @@ export default function ProductsPage() {
           Gagal memuat produk. Silakan coba lagi.
         </div>
       ) : products.length === 0 ? (
-        <EmptyState onAddClick={() => setIsAddModalOpen(true)} />
+        <EmptyState onAddProduct={() => setIsAddModalOpen(true)} />
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-6">
@@ -155,8 +149,8 @@ export default function ProductsPage() {
                     key={option}
                     onClick={() => handleLimitChange(option)}
                     className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${limit === option
-                        ? "bg-violet-600 text-white"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      ? "bg-violet-600 text-white"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                       }`}
                   >
                     {option}

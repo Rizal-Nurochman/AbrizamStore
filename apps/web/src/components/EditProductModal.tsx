@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Package, Loader2, Save } from "lucide-react";
 import { useUpdateProduct } from "@/hooks/useUpdateProduct";
-import { useCategories } from "@/hooks/useCategories";
+import { FIXED_CATEGORIES } from "@/constants/categories";
 import { Product } from "@/types";
 
 interface EditProductModalProps {
@@ -24,7 +24,6 @@ export function EditProductModal({ product, isOpen, onClose, onSuccess }: EditPr
     foto_produk: "",
   });
 
-  const { data: categories = [] } = useCategories();
   const updateProduct = useUpdateProduct();
 
   // Populate form when product changes
@@ -180,8 +179,8 @@ export function EditProductModal({ product, isOpen, onClose, onSuccess }: EditPr
                     required
                   >
                     <option value={0}>Pilih Kategori</option>
-                    {categories.map((cat) => (
-                      <option key={cat.ID} value={cat.ID}>
+                    {FIXED_CATEGORIES.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
                         {cat.nama_kategori}
                       </option>
                     ))}

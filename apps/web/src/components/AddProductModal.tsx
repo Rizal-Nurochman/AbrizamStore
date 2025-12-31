@@ -3,8 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Upload, Package, ImageIcon } from "lucide-react";
-import { Category } from "@/types";
-import { useCategories } from "@/hooks/useCategories";
+import { FIXED_CATEGORIES } from "@/constants/categories";
 import { useCreateProduct } from "@/hooks/useCreateProduct";
 
 interface AddProductModalProps {
@@ -29,7 +28,6 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
   const [jumlahDus, setJumlahDus] = useState<string>("");
 
   // Hooks
-  const { data: categories = [] } = useCategories();
   const createProduct = useCreateProduct();
 
   // Calculate total stock
@@ -230,8 +228,8 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow bg-white"
                   >
                     <option value="">Pilih Kategori</option>
-                    {categories.map((cat: Category) => (
-                      <option key={cat.ID} value={cat.ID}>
+                    {FIXED_CATEGORIES.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
                         {cat.nama_kategori}
                       </option>
                     ))}

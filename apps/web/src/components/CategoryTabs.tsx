@@ -2,15 +2,14 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { Category } from "@/types";
+import { FIXED_CATEGORIES } from "@/constants/categories";
 
 interface CategoryTabsProps {
-  categories: Category[];
   activeCategoryId: number | null;
   onSelectCategory: (id: number | null) => void;
 }
 
-export function CategoryTabs({ categories, activeCategoryId, onSelectCategory }: CategoryTabsProps) {
+export function CategoryTabs({ activeCategoryId, onSelectCategory }: CategoryTabsProps) {
   return (
     <div className="w-full overflow-x-auto pb-4 no-scrollbar">
       <div className="flex gap-2 min-w-max px-1">
@@ -31,16 +30,16 @@ export function CategoryTabs({ categories, activeCategoryId, onSelectCategory }:
           <span className="relative z-10">Semua</span>
         </button>
 
-        {categories.map((category) => (
+        {FIXED_CATEGORIES.map((category) => (
           <button
-            key={category.ID}
-            onClick={() => onSelectCategory(category.ID)}
+            key={category.id}
+            onClick={() => onSelectCategory(category.id)}
             className={cn(
               "relative px-6 py-2.5 rounded-full text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-violet-500",
-              activeCategoryId === category.ID ? "text-white" : "text-gray-600 hover:text-violet-600 bg-white/50 hover:bg-white"
+              activeCategoryId === category.id ? "text-white" : "text-gray-600 hover:text-violet-600 bg-white/50 hover:bg-white"
             )}
           >
-            {activeCategoryId === category.ID && (
+            {activeCategoryId === category.id && (
               <motion.div
                 layoutId="activeTab"
                 className="absolute inset-0 bg-violet-600 rounded-full shadow-lg shadow-violet-200"
@@ -54,3 +53,4 @@ export function CategoryTabs({ categories, activeCategoryId, onSelectCategory }:
     </div>
   );
 }
+

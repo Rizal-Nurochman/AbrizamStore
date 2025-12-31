@@ -254,6 +254,7 @@ func (s *service) LoginOrRegisterWithGoogle(googleUserInfo *oauth2.Userinfo) (*e
 			Name:         googleUserInfo.Name,
 			Email:        googleUserInfo.Email,
 			Password:     "",
+			Role:         "user",
 			AuthProvider: entities.AuthProviderGoogle,
 			IsVerified:   true,
 		}
