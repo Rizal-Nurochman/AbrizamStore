@@ -14,7 +14,6 @@ import (
 var db *gorm.DB
 
 func ConnectionDatabase() {
-	// Try loading .env - not fatal if not found (production uses env vars directly)
 	if err := godotenv.Load("../.env"); err != nil {
 		if err := godotenv.Load(); err != nil {
 			log.Println("No .env file found, using environment variables")
