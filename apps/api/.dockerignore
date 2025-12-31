@@ -1,0 +1,8 @@
+# Ignore files for Docker build
+.env
+main.exe
+*.exe
+.git
+.gitignore
+README.md
+render.yaml
