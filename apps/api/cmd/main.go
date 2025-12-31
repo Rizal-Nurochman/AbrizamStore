@@ -30,8 +30,14 @@ func main() {
 
 	router := gin.Default()
 
+	// CORS configuration - support both local and production
+	allowedOrigins := []string{"http://localhost:3000", "http://localhost:5173"}
+	if frontendURL := os.Getenv("FRONTEND_URL"); frontendURL != "" {
+		allowedOrigins = append(allowedOrigins, frontendURL)
+	}
+
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:3000", "http://localhost:5173"}
+	config.AllowOrigins = allowedOrigins
 	config.AllowCredentials = true
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"}
@@ -51,5 +57,8 @@ func main() {
 	}
 
 	port := os.Getenv("GOLANG_PORT")
+	if port == "" {
+		port = "8080"
+	}
 	router.Run(":" + port)
 }

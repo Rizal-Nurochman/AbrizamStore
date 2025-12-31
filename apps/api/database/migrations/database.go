@@ -14,9 +14,11 @@ import (
 var db *gorm.DB
 
 func ConnectionDatabase() {
-	err := godotenv.Load("../.env")
-	if err != nil {
-		log.Fatal("Gagal memuat file .env", err)
+	// Try loading .env - not fatal if not found (production uses env vars directly)
+	if err := godotenv.Load("../.env"); err != nil {
+		if err := godotenv.Load(); err != nil {
+			log.Println("No .env file found, using environment variables")
+		}
 	}
 
 	host := os.Getenv("DB_HOST")
@@ -25,7 +27,14 @@ func ConnectionDatabase() {
 	dbname := os.Getenv("DB_NAME")
 	dbport := os.Getenv("DB_PORT")
 
-	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + dbport + " sslmode=disable TimeZone=Asia/Shanghai"
+	// SSL mode - default to disable for local, require for production (Supabase)
+	sslmode := os.Getenv("DB_SSLMODE")
+	if sslmode == "" {
+		sslmode = "disable"
+	}
+
+	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + dbport + " sslmode=" + sslmode + " TimeZone=Asia/Shanghai"
+	var err error
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Gagal koneksi database: ", err)

@@ -11,7 +11,7 @@ interface AddProductModalProps {
   onClose: () => void;
 }
 
-type StockMode = "satuan" | "dus";
+type StockMode = "satuan" | "dus" | "liter";
 
 export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -26,14 +26,18 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
   const [stokSatuan, setStokSatuan] = useState<string>("");
   const [isiPerDus, setIsiPerDus] = useState<string>("");
   const [jumlahDus, setJumlahDus] = useState<string>("");
+  const [stokLiter, setStokLiter] = useState<string>("");
 
   // Hooks
   const createProduct = useCreateProduct();
 
   // Calculate total stock
-  const totalStock = stockMode === "satuan"
-    ? (parseInt(stokSatuan) || 0)
-    : (parseInt(isiPerDus) || 0) * (parseInt(jumlahDus) || 0);
+  const totalStock =
+    stockMode === "satuan"
+      ? (parseInt(stokSatuan) || 0)
+      : stockMode === "dus"
+        ? (parseInt(isiPerDus) || 0) * (parseInt(jumlahDus) || 0)
+        : (parseFloat(stokLiter) || 0); // liter mode stores decimal value
 
   // Reset form when modal closes
   useEffect(() => {
@@ -47,6 +51,7 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
       setStokSatuan("");
       setIsiPerDus("");
       setJumlahDus("");
+      setStokLiter("");
     }
   }, [isOpen]);
 
@@ -241,7 +246,7 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     Mode Stok
                   </label>
-                  <div className="flex gap-4">
+                  <div className="flex flex-wrap gap-4">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"
@@ -263,6 +268,17 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
                         className="w-4 h-4 text-violet-600 focus:ring-violet-500"
                       />
                       <span className="text-sm text-gray-700">Dus</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="stockMode"
+                        value="liter"
+                        checked={stockMode === "liter"}
+                        onChange={() => setStockMode("liter")}
+                        className="w-4 h-4 text-violet-600 focus:ring-violet-500"
+                      />
+                      <span className="text-sm text-gray-700">Liter (Kg)</span>
                     </label>
                   </div>
                 </div>
@@ -291,7 +307,7 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">pcs</span>
                       </div>
                     </motion.div>
-                  ) : (
+                  ) : stockMode === "dus" ? (
                     <motion.div
                       key="dus"
                       initial={{ opacity: 0, height: 0 }}
@@ -341,6 +357,32 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
                           {totalStock.toLocaleString()} pcs
                         </span>
                       </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="liter"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                    >
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Jumlah Stok (Liter/Kg)
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="0.1"
+                          step="0.1"
+                          value={stokLiter}
+                          onChange={(e) => setStokLiter(e.target.value)}
+                          placeholder="Masukkan jumlah liter/kg"
+                          className="w-full px-4 py-3 pr-16 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow"
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">liter/kg</span>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Gunakan mode ini untuk produk curah seperti beras, minyak, dll.
+                      </p>
                     </motion.div>
                   )}
                 </AnimatePresence>

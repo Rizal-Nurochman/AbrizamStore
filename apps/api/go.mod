@@ -1,6 +1,8 @@
 module github.com/abrizamstore
 
-go 1.24.2
+go 1.24.0
+
+toolchain go1.24.2
 
 require (
 	github.com/gin-gonic/gin v1.11.0
@@ -9,6 +11,7 @@ require (
 
 require (
 	github.com/gin-contrib/cors v1.7.6
+	golang.org/x/oauth2 v0.33.0
 	google.golang.org/api v0.257.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
@@ -29,7 +32,6 @@ require (
 	go.opentelemetry.io/otel v1.38.0 // indirect
 	go.opentelemetry.io/otel/metric v1.38.0 // indirect
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
-	golang.org/x/oauth2 v0.33.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251124214823-79d6a2a48846 // indirect
 	google.golang.org/grpc v1.77.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
