@@ -27,7 +27,6 @@ func ConnectionDatabase() {
 	dbname := os.Getenv("DB_NAME")
 	dbport := os.Getenv("DB_PORT")
 
-	// SSL mode - default to disable for local, require for production (Supabase)
 	sslmode := os.Getenv("DB_SSLMODE")
 	if sslmode == "" {
 		sslmode = "disable"
@@ -52,7 +51,6 @@ func ConnectionDatabase() {
 		log.Fatal("Gagal migrasi tabel: ", err)
 	}
 
-	// Seed default categories
 	seedDefaultCategories(db)
 
 	fmt.Println("Koneksi database sukses!")
