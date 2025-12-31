@@ -81,12 +81,17 @@ func (h *handler) Login(c *gin.Context) {
 		return
 	}
 
+	cookieDomain := os.Getenv("COOKIE_DOMAIN")
+	if cookieDomain == "" {
+		cookieDomain = "localhost"
+	}
+
 	c.SetCookie(
 		"Authorization", // Nama yang sama dengan yang dibaca middleware
 		token,           // Token dari service
 		3600*12,         // 12 jam
 		"/",             // Path
-		"localhost",     // Domain
+		cookieDomain,    // Domain
 		false,           // Secure
 		true,            // HttpOnly
 	)
@@ -149,12 +154,17 @@ func (h *handler) GoogleLoginHandler(c *gin.Context) {
 		return
 	}
 
+	cookieDomain := os.Getenv("COOKIE_DOMAIN")
+	if cookieDomain == "" {
+		cookieDomain = "localhost"
+	}
+
 	c.SetCookie(
 		"Authorization", // Match standard auth cookie name
 		appToken,
 		3600*12, // 12 hours
 		"/",
-		"localhost",
+		cookieDomain,
 		false, // Set to true in production
 		true,
 	)
@@ -202,12 +212,17 @@ func (h *handler) GoogleCallbackHandler(c *gin.Context) {
 		return
 	}
 
+	cookieDomain := os.Getenv("COOKIE_DOMAIN")
+	if cookieDomain == "" {
+		cookieDomain = "localhost"
+	}
+
 	c.SetCookie(
 		"Authorization", // Match standard auth cookie name
 		appToken,
 		3600*12, // 12 hours
 		"/",
-		"localhost",
+		cookieDomain,
 		false, // Set to true in production
 		true,
 	)
