@@ -1,2 +1,0 @@
-# Build command for Render
-# Run from root: go build -o main ./cmd
