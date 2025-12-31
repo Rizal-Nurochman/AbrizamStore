@@ -90,6 +90,7 @@ export default function RegisterPage() {
 
   const loginWithGoogle = useGoogleLogin({
     flow: 'auth-code',
+    ux_mode: 'popup',
     onSuccess: (codeResponse) => {
       googleLoginMutation.mutate({
         code: codeResponse.code,
