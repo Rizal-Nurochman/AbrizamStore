@@ -50,7 +50,7 @@ func (s *service) UpdateProfile(userID uint, input dto.UserUpdate) (*entities.Us
 		user.ProfileImage = input.ProfileImage
 	}
 
-	updatedUser, err := s.repository.Create(user)
+	updatedUser, err := s.repository.Update(user)
 	if err != nil {
 		return nil, err
 	}
