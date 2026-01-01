@@ -128,6 +128,7 @@ export function EditProductModal({ product, isOpen, onClose, onSuccess }: EditPr
                         type="number"
                         value={formData.harga_beli}
                         onChange={(e) => setFormData({ ...formData, harga_beli: parseInt(e.target.value) || 0 })}
+                        onWheel={(e) => e.currentTarget.blur()}
                         className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                         required
                         min={0}
@@ -144,6 +145,7 @@ export function EditProductModal({ product, isOpen, onClose, onSuccess }: EditPr
                         type="number"
                         value={formData.harga_jual}
                         onChange={(e) => setFormData({ ...formData, harga_jual: parseInt(e.target.value) || 0 })}
+                        onWheel={(e) => e.currentTarget.blur()}
                         className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                         required
                         min={0}
@@ -161,6 +163,7 @@ export function EditProductModal({ product, isOpen, onClose, onSuccess }: EditPr
                     type="number"
                     value={formData.stok}
                     onChange={(e) => setFormData({ ...formData, stok: parseInt(e.target.value) || 0 })}
+                    onWheel={(e) => e.currentTarget.blur()}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                     required
                     min={0}

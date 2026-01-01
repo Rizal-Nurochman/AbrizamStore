@@ -197,6 +197,7 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
                         min="0"
                         value={hargaBeli || ""}
                         onChange={(e) => setHargaBeli(Math.max(0, parseInt(e.target.value) || 0))}
+                        onWheel={(e) => e.currentTarget.blur()}
                         placeholder="0"
                         className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow"
                         required
@@ -214,6 +215,7 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
                         min="0"
                         value={hargaJual || ""}
                         onChange={(e) => setHargaJual(Math.max(0, parseInt(e.target.value) || 0))}
+                        onWheel={(e) => e.currentTarget.blur()}
                         placeholder="0"
                         className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow"
                         required
@@ -301,6 +303,7 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
                           min="1"
                           value={stokSatuan}
                           onChange={(e) => setStokSatuan(e.target.value)}
+                          onWheel={(e) => e.currentTarget.blur()}
                           placeholder="Masukkan jumlah satuan"
                           className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow"
                         />
@@ -326,6 +329,7 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
                               min="1"
                               value={isiPerDus}
                               onChange={(e) => setIsiPerDus(e.target.value)}
+                              onWheel={(e) => e.currentTarget.blur()}
                               placeholder="Masukkan isi per dus"
                               className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow"
                             />
@@ -342,6 +346,7 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
                               min="1"
                               value={jumlahDus}
                               onChange={(e) => setJumlahDus(e.target.value)}
+                              onWheel={(e) => e.currentTarget.blur()}
                               placeholder="Masukkan jumlah dus"
                               className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow"
                             />
@@ -375,6 +380,7 @@ export function AddProductModal({ isOpen, onClose }: AddProductModalProps) {
                           step="0.1"
                           value={stokLiter}
                           onChange={(e) => setStokLiter(e.target.value)}
+                          onWheel={(e) => e.currentTarget.blur()}
                           placeholder="Masukkan jumlah liter/kg"
                           className="w-full px-4 py-3 pr-16 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-shadow"
                         />

@@ -339,6 +339,7 @@ export default function RestockPage() {
                               type="number"
                               value={item.buyPrice || ""}
                               onChange={(e) => updateBuyPrice(item.product.ID, parseInt(e.target.value) || 0)}
+                              onWheel={(e) => e.currentTarget.blur()}
                               className="w-full pl-7 pr-2 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                             />
                           </div>
