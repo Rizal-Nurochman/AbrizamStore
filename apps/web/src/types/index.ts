@@ -50,6 +50,10 @@ export interface DetailPenjualan {
   harga_jual: number;
   jumlah: number;
   subtotal: number;
+  Produk?: {
+    nama_produk: string;
+    foto_produk?: string;
+  };
 }
 
 // Detail Pembelian
@@ -60,6 +64,10 @@ export interface DetailPembelian {
   harga_beli: number;
   jumlah: number;
   subtotal: number;
+  Produk?: {
+    nama_produk: string;
+    foto_produk?: string;
+  };
 }
 
 // Penjualan (Sale)

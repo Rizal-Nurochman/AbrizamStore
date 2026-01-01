@@ -133,7 +133,7 @@ export function TransactionDetailModal({
                     <h3 className="text-sm font-medium text-gray-500 mb-3">
                       Daftar Produk ({details.length} item)
                     </h3>
-                    {details.map((item: any, index: number) => (
+                    {details.map((item, index) => (
                       <motion.div
                         key={item.ID}
                         initial={{ opacity: 0, y: 10 }}
@@ -162,7 +162,7 @@ export function TransactionDetailModal({
                               {item.Produk?.nama_produk || "Produk tidak ditemukan"}
                             </h4>
                             <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
-                              <span>{item.jumlah} x {formatCurrency(isPenjualan ? item.harga_jual : item.harga_beli)}</span>
+                              <span>{item.jumlah} x {formatCurrency('harga_jual' in item ? item.harga_jual : item.harga_beli)}</span>
                             </div>
                           </div>
 
