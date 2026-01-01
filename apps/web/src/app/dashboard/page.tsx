@@ -10,14 +10,17 @@ import {
   Package,
   Loader2,
   Trophy,
-  BarChart3
+  BarChart3,
+  Store
 } from "lucide-react";
 import { useDashboardSummary, useTopProducts, useSalesTrend } from "@/hooks/useDashboard";
+import { useProfile } from "@/hooks/useProfile";
 
 export default function DashboardPage() {
   const { data: summary, isLoading: summaryLoading } = useDashboardSummary();
   const { data: topProducts, isLoading: topProductsLoading } = useTopProducts();
   const { data: salesTrend, isLoading: trendLoading } = useSalesTrend();
+  const { data: profile } = useProfile();
 
   const isLoading = summaryLoading || topProductsLoading || trendLoading;
 
@@ -45,14 +48,24 @@ export default function DashboardPage() {
   return (
     <>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-200">
-          <LayoutDashboard className="w-6 h-6 text-white" />
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-200">
+            <LayoutDashboard className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-sm text-gray-500">Ringkasan analisis bisnis Anda</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-500">Ringkasan analisis bisnis Anda</p>
-        </div>
+
+        {/* Store Name Display */}
+        {profile?.store_name && (
+          <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-50 to-indigo-50 rounded-xl border border-violet-100">
+            <Store className="w-5 h-5 text-violet-600" />
+            <span className="font-semibold text-violet-700">{profile.store_name}</span>
+          </div>
+        )}
       </div>
 
       {isLoading ? (
@@ -243,12 +256,12 @@ export default function DashboardPage() {
                             animate={{ width: `${percentage}%` }}
                             transition={{ delay: 0.6 + index * 0.1, duration: 0.5 }}
                             className={`h-full rounded-full ${index === 0
-                                ? "bg-gradient-to-r from-amber-400 to-yellow-500"
-                                : index === 1
-                                  ? "bg-gradient-to-r from-gray-300 to-gray-400"
-                                  : index === 2
-                                    ? "bg-gradient-to-r from-amber-600 to-amber-700"
-                                    : "bg-gradient-to-r from-violet-400 to-indigo-500"
+                              ? "bg-gradient-to-r from-amber-400 to-yellow-500"
+                              : index === 1
+                                ? "bg-gradient-to-r from-gray-300 to-gray-400"
+                                : index === 2
+                                  ? "bg-gradient-to-r from-amber-600 to-amber-700"
+                                  : "bg-gradient-to-r from-violet-400 to-indigo-500"
                               }`}
                           />
                         </div>

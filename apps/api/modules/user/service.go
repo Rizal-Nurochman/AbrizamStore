@@ -1,6 +1,8 @@
 package user
 
 import (
+	"fmt"
+
 	"github.com/abrizamstore/database/entities"
 	"github.com/abrizamstore/package/dto"
 	"golang.org/x/crypto/bcrypt"
@@ -40,6 +42,10 @@ func (s *service) UpdateProfile(userID uint, input dto.UserUpdate) (*entities.Us
 		user.Email = input.Email
 	}
 	if input.Password != "" {
+		// Block password change for Google users
+		if user.AuthProvider == entities.AuthProviderGoogle {
+			return nil, fmt.Errorf("user yang login dengan Google tidak dapat mengubah password")
+		}
 		passwordHash, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 		if err != nil {
 			return nil, err
@@ -48,6 +54,9 @@ func (s *service) UpdateProfile(userID uint, input dto.UserUpdate) (*entities.Us
 	}
 	if input.ProfileImage != "" {
 		user.ProfileImage = input.ProfileImage
+	}
+	if input.StoreName != "" {
+		user.StoreName = input.StoreName
 	}
 
 	updatedUser, err := s.repository.Update(user)

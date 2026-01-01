@@ -90,6 +90,8 @@ export interface User {
   role: string;
   profile_image?: string;
   is_verified: boolean;
+  auth_provider: string;
+  store_name?: string;
 }
 
 export interface UpdateProfilePayload {
@@ -97,4 +99,5 @@ export interface UpdateProfilePayload {
   email?: string;
   password?: string;
   profile_image?: string;
+  store_name?: string;
 }
