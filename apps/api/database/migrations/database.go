@@ -56,6 +56,19 @@ func ConnectionDatabase() {
 }
 
 func seedDefaultCategories(db *gorm.DB) {
+	// Fix: Rename existing "Lain-lain" (ID 3) to "Sembako" if "Sembako" doesn't exist yet
+	// This ensures products already saved with ID 3 will correctly show as "Sembako"
+	var existingSembako entities.Kategori
+	if err := db.Where("nama_kategori = ?", "Sembako").First(&existingSembako).Error; err == gorm.ErrRecordNotFound {
+		// Sembako doesn't exist, so rename "Lain-lain" to "Sembako"
+		var lainlain entities.Kategori
+		if err := db.Where("nama_kategori = ?", "Lain-lain").First(&lainlain).Error; err == nil {
+			db.Model(&lainlain).Update("nama_kategori", "Sembako")
+			fmt.Println("Renamed 'Lain-lain' to 'Sembako'")
+		}
+	}
+
+	// Now create default categories (including new "Lain-lain")
 	defaultCategories := []string{"Makanan", "Minuman", "Sembako", "Lain-lain"}
 
 	for _, name := range defaultCategories {

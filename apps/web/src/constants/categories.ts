@@ -9,8 +9,8 @@ export interface FixedCategory {
 export const FIXED_CATEGORIES: FixedCategory[] = [
   { id: 1, nama_kategori: "Makanan" },
   { id: 2, nama_kategori: "Minuman" },
-  { id: 3, nama_kategori: "Lain-lain" },
-  { id: 4, nama_kategori: "Sembako" },
+  { id: 3, nama_kategori: "Sembako" },
+  { id: 4, nama_kategori: "Lain-lain" },
 ];
 
 // Helper function to get category name by id
