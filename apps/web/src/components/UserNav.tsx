@@ -14,13 +14,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { logoutAction } from "@/actions/auth";
+import { useLogout } from "@/hooks/useLogout";
 import { LogOut, Settings } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import Link from "next/link";
 
 export function UserNav() {
   const { data: profile, isLoading } = useProfile();
+  const { logout } = useLogout();
 
   const getInitials = (name: string) => {
     if (!name) return "U";
@@ -67,7 +68,7 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer"
-          onClick={() => logoutAction()}
+          onClick={() => logout()}
         >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Keluar</span>

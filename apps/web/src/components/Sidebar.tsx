@@ -5,7 +5,7 @@ import { LayoutDashboard, Package, Settings, LogOut, CreditCard, PackagePlus, Cl
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { logoutAction } from "@/actions/auth";
+import { useLogout } from "@/hooks/useLogout";
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
@@ -20,6 +20,7 @@ const sidebarItems = [
 // Desktop Sidebar
 export function Sidebar() {
   const pathname = usePathname();
+  const { logout } = useLogout();
 
   return (
     <div className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-white/80 backdrop-blur-xl border-r border-gray-200/50 shadow-sm z-50">
@@ -52,7 +53,7 @@ export function Sidebar() {
 
       <div className="p-4 border-t border-gray-100">
         <button
-          onClick={() => logoutAction()}
+          onClick={() => logout()}
           className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors"
         >
           <LogOut className="w-5 h-5" />
@@ -84,6 +85,7 @@ export function MobileHeader({ onMenuClick }: { onMenuClick: () => void }) {
 // Mobile Sidebar Drawer
 export function MobileSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const pathname = usePathname();
+  const { logout } = useLogout();
 
   return (
     <>
@@ -142,7 +144,7 @@ export function MobileSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: (
           <button
             onClick={() => {
               onClose();
-              logoutAction();
+              logout();
             }}
             className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors"
           >
