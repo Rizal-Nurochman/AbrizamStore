@@ -35,7 +35,7 @@ export default function ReportsPage() {
   const [endDate, setEndDate] = useState(today.toISOString().split("T")[0]);
 
   // Fetch reports
-  const { data: salesData, isLoading: salesLoading } = useSalesReport(startDate, endDate);
+  const { data: salesData, isLoading: salesLoading, error: salesError } = useSalesReport(startDate, endDate);
   const { data: profitData, isLoading: profitLoading } = useProfitLossReport(startDate, endDate);
   const { data: stockData, isLoading: stockLoading } = useStockReport();
 
@@ -251,132 +251,148 @@ export default function ReportsPage() {
       ) : (
         <AnimatePresence mode="wait">
           {/* Sales Report */}
-          {activeTab === "sales" && salesData && (
+          {activeTab === "sales" && (
             <motion.div
               key="sales"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
             >
-              {/* Explanation Card */}
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-5 mb-6 border border-green-100">
-                <div className="flex items-start gap-3">
-                  <Info className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h3 className="font-semibold text-green-800 mb-1">Apa itu Laporan Penjualan?</h3>
-                    <p className="text-sm text-green-700">
-                      Laporan ini menunjukkan <strong>total uang yang masuk</strong> dari penjualan barang.
-                      Omzet adalah jumlah total uang yang Anda terima dari pelanggan. Semakin tinggi omzet, semakin banyak barang yang terjual.
-                    </p>
+              {salesError ? (
+                <div className="bg-red-50 rounded-2xl p-8 text-center border border-red-200">
+                  <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-red-800 mb-2">Gagal memuat data</h3>
+                  <p className="text-sm text-red-600">Terjadi kesalahan saat mengambil data penjualan. Silakan coba lagi.</p>
+                </div>
+              ) : !salesData ? (
+                <div className="bg-gray-50 rounded-2xl p-8 text-center border border-gray-200">
+                  <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Belum ada data</h3>
+                  <p className="text-sm text-gray-500">Data penjualan tidak tersedia untuk periode ini.</p>
+                </div>
+              ) : (
+                <>
+                  {/* Explanation Card */}
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-5 mb-6 border border-green-100">
+                    <div className="flex items-start gap-3">
+                      <Info className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h3 className="font-semibold text-green-800 mb-1">Apa itu Laporan Penjualan?</h3>
+                        <p className="text-sm text-green-700">
+                          Laporan ini menunjukkan <strong>total uang yang masuk</strong> dari penjualan barang.
+                          Omzet adalah jumlah total uang yang Anda terima dari pelanggan. Semakin tinggi omzet, semakin banyak barang yang terjual.
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Summary Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-                  <p className="text-sm text-gray-500 mb-1">Total Omzet</p>
-                  <p className="text-2xl font-bold text-green-600">{formatCurrency(salesData.total_omzet)}</p>
-                </div>
-                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-                  <p className="text-sm text-gray-500 mb-1">Jumlah Transaksi</p>
-                  <p className="text-2xl font-bold text-gray-900">{salesData.total_transaksi}</p>
-                </div>
-                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-                  <p className="text-sm text-gray-500 mb-1">Rata-rata Harian</p>
-                  <p className="text-2xl font-bold text-blue-600">{formatCurrency(salesData.rata_rata_harian)}</p>
-                </div>
-                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200">
-                  <p className="text-sm text-emerald-600 mb-1">Laba Bersih</p>
-                  <p className="text-2xl font-bold text-emerald-600">{formatCurrency(profitData?.total_laba || 0)}</p>
-                  <p className="text-xs text-emerald-500 mt-1">Keuntungan ✨</p>
-                </div>
-                <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-                  <p className="text-sm text-gray-500 mb-1">Hari Terbaik</p>
-                  <p className="text-lg font-bold text-gray-900">{salesData.hari_terbaik ? formatDate(salesData.hari_terbaik) : "-"}</p>
-                  <p className="text-sm text-green-600">{formatCurrency(salesData.omzet_terbaik)}</p>
-                </div>
-              </div>
+                  {/* Summary Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+                    <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                      <p className="text-sm text-gray-500 mb-1">Total Omzet</p>
+                      <p className="text-2xl font-bold text-green-600">{formatCurrency(salesData.total_omzet)}</p>
+                    </div>
+                    <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                      <p className="text-sm text-gray-500 mb-1">Jumlah Transaksi</p>
+                      <p className="text-2xl font-bold text-gray-900">{salesData.total_transaksi}</p>
+                    </div>
+                    <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                      <p className="text-sm text-gray-500 mb-1">Rata-rata Harian</p>
+                      <p className="text-2xl font-bold text-blue-600">{formatCurrency(salesData.rata_rata_harian)}</p>
+                    </div>
+                    <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 bg-gradient-to-br from-emerald-50 to-green-50 border-emerald-200">
+                      <p className="text-sm text-emerald-600 mb-1">Laba Bersih</p>
+                      <p className="text-2xl font-bold text-emerald-600">{formatCurrency(profitData?.total_laba || 0)}</p>
+                      <p className="text-xs text-emerald-500 mt-1">Keuntungan ✨</p>
+                    </div>
+                    <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                      <p className="text-sm text-gray-500 mb-1">Hari Terbaik</p>
+                      <p className="text-lg font-bold text-gray-900">{salesData.hari_terbaik ? formatDate(salesData.hari_terbaik) : "-"}</p>
+                      <p className="text-sm text-green-600">{formatCurrency(salesData.omzet_terbaik)}</p>
+                    </div>
+                  </div>
 
 
-              {/* Table */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 w-8"></th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Tanggal</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Produk</th>
-                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Qty</th>
-                        <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Harga</th>
-                        <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Subtotal</th>
-                        <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {salesData.items?.map((item, index) => {
-                        const isExpanded = expandedSalesIds.has(item.id);
-                        const hasDetails = item.details && item.details.length > 0;
-                        const toggleExpand = () => {
-                          setExpandedSalesIds(prev => {
-                            const newSet = new Set(prev);
-                            if (newSet.has(item.id)) {
-                              newSet.delete(item.id);
-                            } else {
-                              newSet.add(item.id);
-                            }
-                            return newSet;
-                          });
-                        };
+                  {/* Table */}
+                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 w-8"></th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Tanggal</th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Produk</th>
+                            <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Qty</th>
+                            <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Harga</th>
+                            <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Subtotal</th>
+                            <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {salesData.items?.map((item, index) => {
+                            const isExpanded = expandedSalesIds.has(item.id);
+                            const hasDetails = item.details && item.details.length > 0;
+                            const toggleExpand = () => {
+                              setExpandedSalesIds(prev => {
+                                const newSet = new Set(prev);
+                                if (newSet.has(item.id)) {
+                                  newSet.delete(item.id);
+                                } else {
+                                  newSet.add(item.id);
+                                }
+                                return newSet;
+                              });
+                            };
 
-                        return (
-                          <React.Fragment key={item.id}>
-                            {/* Main transaction row */}
-                            <tr
-                              className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"} ${hasDetails ? "cursor-pointer hover:bg-violet-50 transition-colors" : ""}`}
-                              onClick={hasDetails ? toggleExpand : undefined}
-                            >
-                              <td className="px-4 py-3 text-sm">
-                                {hasDetails && (
-                                  <button className="text-gray-400 hover:text-violet-600 transition-colors">
-                                    {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                                  </button>
-                                )}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-gray-900 font-medium">{formatDate(item.tanggal)}</td>
-                              <td className="px-4 py-3 text-sm text-gray-500">
-                                {hasDetails ? `${item.jumlah_item} produk` : "-"}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-center text-gray-600">-</td>
-                              <td className="px-4 py-3 text-sm text-right text-gray-600">-</td>
-                              <td className="px-4 py-3 text-sm text-right text-gray-600">-</td>
-                              <td className="px-4 py-3 text-sm text-right font-bold text-green-600">{formatCurrency(item.total_penjualan)}</td>
-                            </tr>
-                            {/* Expanded detail rows */}
-                            {isExpanded && hasDetails && item.details.map((detail, detailIndex) => (
-                              <tr key={`${item.id}-${detailIndex}`} className="bg-violet-50/50">
-                                <td className="px-4 py-2"></td>
-                                <td className="px-4 py-2"></td>
-                                <td className="px-4 py-2 text-sm text-gray-700">
-                                  <span className="pl-4 flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
-                                    {detail.nama_produk}
-                                  </span>
-                                </td>
-                                <td className="px-4 py-2 text-sm text-center text-gray-600">{detail.jumlah}</td>
-                                <td className="px-4 py-2 text-sm text-right text-gray-600">{formatCurrency(detail.harga_jual)}</td>
-                                <td className="px-4 py-2 text-sm text-right font-medium text-violet-600">{formatCurrency(detail.subtotal)}</td>
-                                <td className="px-4 py-2"></td>
-                              </tr>
-                            ))}
-                          </React.Fragment>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                            return (
+                              <React.Fragment key={item.id}>
+                                {/* Main transaction row */}
+                                <tr
+                                  className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"} ${hasDetails ? "cursor-pointer hover:bg-violet-50 transition-colors" : ""}`}
+                                  onClick={hasDetails ? toggleExpand : undefined}
+                                >
+                                  <td className="px-4 py-3 text-sm">
+                                    {hasDetails && (
+                                      <button className="text-gray-400 hover:text-violet-600 transition-colors">
+                                        {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                      </button>
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm text-gray-900 font-medium">{formatDate(item.tanggal)}</td>
+                                  <td className="px-4 py-3 text-sm text-gray-500">
+                                    {hasDetails ? `${item.jumlah_item} produk` : "-"}
+                                  </td>
+                                  <td className="px-4 py-3 text-sm text-center text-gray-600">-</td>
+                                  <td className="px-4 py-3 text-sm text-right text-gray-600">-</td>
+                                  <td className="px-4 py-3 text-sm text-right text-gray-600">-</td>
+                                  <td className="px-4 py-3 text-sm text-right font-bold text-green-600">{formatCurrency(item.total_penjualan)}</td>
+                                </tr>
+                                {/* Expanded detail rows */}
+                                {isExpanded && hasDetails && item.details?.map((detail, detailIndex) => (
+                                  <tr key={`${item.id}-${detailIndex}`} className="bg-violet-50/50">
+                                    <td className="px-4 py-2"></td>
+                                    <td className="px-4 py-2"></td>
+                                    <td className="px-4 py-2 text-sm text-gray-700">
+                                      <span className="pl-4 flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
+                                        {detail.nama_produk}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-2 text-sm text-center text-gray-600">{detail.jumlah}</td>
+                                    <td className="px-4 py-2 text-sm text-right text-gray-600">{formatCurrency(detail.harga_jual)}</td>
+                                    <td className="px-4 py-2 text-sm text-right font-medium text-violet-600">{formatCurrency(detail.subtotal)}</td>
+                                    <td className="px-4 py-2"></td>
+                                  </tr>
+                                ))}
+                              </React.Fragment>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              )}
             </motion.div>
           )}
 

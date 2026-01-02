@@ -16,7 +16,7 @@ interface SalesReportItem {
   tanggal: string;
   total_penjualan: number;
   jumlah_item: number;
-  details: SalesDetailItem[];
+  details?: SalesDetailItem[] | null;
 }
 
 interface SalesReportResponse {
