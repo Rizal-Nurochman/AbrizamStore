@@ -56,7 +56,7 @@ func ConnectionDatabase() {
 }
 
 func seedDefaultCategories(db *gorm.DB) {
-	defaultCategories := []string{"Makanan", "Minuman", "Lain-lain"}
+	defaultCategories := []string{"Makanan", "Minuman", "Sembako", "Lain-lain"}
 
 	for _, name := range defaultCategories {
 		var existing entities.Kategori
