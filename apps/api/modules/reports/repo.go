@@ -35,6 +35,19 @@ func (r *repository) GetSalesReport(startDate, endDate time.Time, userID uint) (
 		return nil, err
 	}
 
+	// Fetch details for each sale item
+	for i := range items {
+		var details []dto.SalesDetailItem
+		err := r.db.Table("detail_penjualans").
+			Select("p.nama_produk, detail_penjualans.jumlah, detail_penjualans.harga_jual, detail_penjualans.subtotal").
+			Joins("LEFT JOIN produks p ON p.id = detail_penjualans.id_produk").
+			Where("detail_penjualans.id_penjualan = ?", items[i].ID).
+			Scan(&details).Error
+		if err == nil {
+			items[i].Details = details
+		}
+	}
+
 	// Calculate totals
 	var totalOmzet int64
 	var totalTransaksi int64

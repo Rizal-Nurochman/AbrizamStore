@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FileText,
@@ -12,7 +12,9 @@ import {
   Loader2,
   AlertTriangle,
   CheckCircle,
-  Info
+  Info,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { useSalesReport, useProfitLossReport, useStockReport } from "@/hooks/useReports";
 import jsPDF from "jspdf";
@@ -22,6 +24,7 @@ type TabType = "sales" | "profit" | "stock";
 
 export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState<TabType>("sales");
+  const [expandedSalesIds, setExpandedSalesIds] = useState<Set<number>>(new Set());
 
   // Date range - default last 30 days
   const today = new Date();
@@ -77,16 +80,42 @@ export default function ReportsPage() {
       doc.text(`Total Transaksi: ${salesData.total_transaksi}`, 14, 56);
       doc.text(`Laba Bersih: ${formatCurrency(labaBersih)}`, 14, 62);
 
-      autoTable(doc, {
-        startY: 70,
-        head: [["No", "Tanggal", "Jumlah Item", "Total Penjualan"]],
-        body: salesData.items?.map((item, index) => [
+      // Build table body with product details
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const tableBody: any[][] = [];
+      salesData.items?.forEach((item, index) => {
+        // Main transaction row
+        tableBody.push([
           index + 1,
           formatDate(item.tanggal),
-          item.jumlah_item,
+          "",
+          "",
+          "",
           formatCurrency(item.total_penjualan),
-        ]),
-        foot: [["", "TOTAL", salesData.total_transaksi + " transaksi", formatCurrency(salesData.total_omzet)]],
+        ]);
+        // Detail rows for each product
+        if (item.details && item.details.length > 0) {
+          item.details.forEach((detail) => {
+            tableBody.push([
+              "",
+              "",
+              detail.nama_produk,
+              detail.jumlah,
+              formatCurrency(detail.harga_jual),
+              formatCurrency(detail.subtotal),
+            ]);
+          });
+        }
+      });
+
+      autoTable(doc, {
+        startY: 70,
+        head: [["No", "Tanggal", "Produk", "Qty", "Harga", "Subtotal/Total"]],
+        body: tableBody,
+        foot: [["", "TOTAL", "", "", "", formatCurrency(salesData.total_omzet)]],
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [139, 92, 246] },
+        footStyles: { fillColor: [34, 197, 94], textColor: 255, fontStyle: "bold" },
       });
 
       // Add laba bersih at the bottom
@@ -269,25 +298,81 @@ export default function ReportsPage() {
                 </div>
               </div>
 
+
               {/* Table */}
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-gray-50">
                       <tr>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600 w-8"></th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Tanggal</th>
-                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Jumlah Item</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Produk</th>
+                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Qty</th>
+                        <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Harga</th>
+                        <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Subtotal</th>
                         <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Total</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {salesData.items?.map((item, index) => (
-                        <tr key={item.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                          <td className="px-4 py-3 text-sm text-gray-900">{formatDate(item.tanggal)}</td>
-                          <td className="px-4 py-3 text-sm text-center text-gray-600">{item.jumlah_item}</td>
-                          <td className="px-4 py-3 text-sm text-right font-semibold text-green-600">{formatCurrency(item.total_penjualan)}</td>
-                        </tr>
-                      ))}
+                      {salesData.items?.map((item, index) => {
+                        const isExpanded = expandedSalesIds.has(item.id);
+                        const hasDetails = item.details && item.details.length > 0;
+                        const toggleExpand = () => {
+                          setExpandedSalesIds(prev => {
+                            const newSet = new Set(prev);
+                            if (newSet.has(item.id)) {
+                              newSet.delete(item.id);
+                            } else {
+                              newSet.add(item.id);
+                            }
+                            return newSet;
+                          });
+                        };
+
+                        return (
+                          <React.Fragment key={item.id}>
+                            {/* Main transaction row */}
+                            <tr
+                              className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"} ${hasDetails ? "cursor-pointer hover:bg-violet-50 transition-colors" : ""}`}
+                              onClick={hasDetails ? toggleExpand : undefined}
+                            >
+                              <td className="px-4 py-3 text-sm">
+                                {hasDetails && (
+                                  <button className="text-gray-400 hover:text-violet-600 transition-colors">
+                                    {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                  </button>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-gray-900 font-medium">{formatDate(item.tanggal)}</td>
+                              <td className="px-4 py-3 text-sm text-gray-500">
+                                {hasDetails ? `${item.jumlah_item} produk` : "-"}
+                              </td>
+                              <td className="px-4 py-3 text-sm text-center text-gray-600">-</td>
+                              <td className="px-4 py-3 text-sm text-right text-gray-600">-</td>
+                              <td className="px-4 py-3 text-sm text-right text-gray-600">-</td>
+                              <td className="px-4 py-3 text-sm text-right font-bold text-green-600">{formatCurrency(item.total_penjualan)}</td>
+                            </tr>
+                            {/* Expanded detail rows */}
+                            {isExpanded && hasDetails && item.details.map((detail, detailIndex) => (
+                              <tr key={`${item.id}-${detailIndex}`} className="bg-violet-50/50">
+                                <td className="px-4 py-2"></td>
+                                <td className="px-4 py-2"></td>
+                                <td className="px-4 py-2 text-sm text-gray-700">
+                                  <span className="pl-4 flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
+                                    {detail.nama_produk}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-2 text-sm text-center text-gray-600">{detail.jumlah}</td>
+                                <td className="px-4 py-2 text-sm text-right text-gray-600">{formatCurrency(detail.harga_jual)}</td>
+                                <td className="px-4 py-2 text-sm text-right font-medium text-violet-600">{formatCurrency(detail.subtotal)}</td>
+                                <td className="px-4 py-2"></td>
+                              </tr>
+                            ))}
+                          </React.Fragment>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

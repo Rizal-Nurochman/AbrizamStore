@@ -4,11 +4,19 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
 // Types
+interface SalesDetailItem {
+  nama_produk: string;
+  jumlah: number;
+  harga_jual: number;
+  subtotal: number;
+}
+
 interface SalesReportItem {
   id: number;
   tanggal: string;
   total_penjualan: number;
   jumlah_item: number;
+  details: SalesDetailItem[];
 }
 
 interface SalesReportResponse {
@@ -101,6 +109,7 @@ export const useStockReport = () => {
 
 // Export types
 export type {
+  SalesDetailItem,
   SalesReportItem,
   SalesReportResponse,
   ProfitLossItem,
