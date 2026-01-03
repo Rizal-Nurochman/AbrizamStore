@@ -123,30 +123,30 @@ export default function TransactionsPage() {
   return (
     <>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-200">
-          <ClipboardList className="w-6 h-6 text-white" />
+      <div className="flex items-center gap-3 mb-4 sm:mb-6">
+        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-200">
+          <ClipboardList className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Riwayat Transaksi</h1>
-          <p className="text-sm text-gray-500">Klik transaksi untuk melihat detail produk</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Riwayat Transaksi</h1>
+          <p className="text-xs sm:text-sm text-gray-500">Klik transaksi untuk melihat detail</p>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
+          className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm border border-gray-100"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-green-600" />
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-green-100 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Total Penjualan</p>
-              <p className="text-2xl font-bold text-gray-900">{penjualanTotal}</p>
+              <p className="text-xs sm:text-sm text-gray-500">Penjualan</p>
+              <p className="text-lg sm:text-2xl font-bold text-gray-900">{penjualanTotal}</p>
             </div>
           </div>
         </motion.div>
@@ -155,34 +155,34 @@ export default function TransactionsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100"
+          className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-sm border border-gray-100"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
-              <TrendingDown className="w-6 h-6 text-orange-600" />
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-orange-100 flex items-center justify-center">
+              <TrendingDown className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Total Pembelian</p>
-              <p className="text-2xl font-bold text-gray-900">{pembelianTotal}</p>
+              <p className="text-xs sm:text-sm text-gray-500">Pembelian</p>
+              <p className="text-lg sm:text-2xl font-bold text-gray-900">{pembelianTotal}</p>
             </div>
           </div>
         </motion.div>
       </div>
 
       {/* Tabs */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 mb-4 sm:mb-6">
         <div className="flex border-b border-gray-100">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 font-medium transition-all relative ${activeTab === tab.id
+              className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 py-3 sm:py-4 px-2 sm:px-6 font-medium transition-all relative ${activeTab === tab.id
                 ? "text-violet-600"
                 : "text-gray-500 hover:text-gray-700"
                 }`}
             >
-              <tab.icon className="w-5 h-5" />
-              <span>{tab.label}</span>
+              <tab.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-xs sm:text-sm">{tab.label}</span>
               {activeTab === tab.id && (
                 <motion.div
                   layoutId="activeTab"
@@ -221,34 +221,34 @@ export default function TransactionsPage() {
                       key={`${transaction.type}-${transaction.ID}`}
                       layout
                       onClick={() => handleTransactionClick(transaction.ID, transaction.type)}
-                      className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-violet-200 transition-all cursor-pointer group"
+                      className="bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-violet-200 transition-all cursor-pointer group"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${transaction.type === "penjualan"
+                      <div className="flex items-center gap-2 sm:gap-4">
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex-shrink-0 flex items-center justify-center ${transaction.type === "penjualan"
                           ? "bg-green-100"
                           : "bg-orange-100"
                           }`}>
                           {transaction.type === "penjualan" ? (
-                            <ShoppingCart className="w-6 h-6 text-green-600" />
+                            <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                           ) : (
-                            <PackagePlus className="w-6 h-6 text-orange-600" />
+                            <PackagePlus className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
                           )}
                         </div>
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-gray-900">
+                            <h3 className="text-sm sm:text-base font-semibold text-gray-900 truncate">
                               {transaction.type === "penjualan" ? "Penjualan" : "Pembelian"} #{transaction.ID}
                             </h3>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${transaction.type === "penjualan"
+                            <span className={`hidden sm:inline px-2 py-0.5 rounded-full text-xs font-medium ${transaction.type === "penjualan"
                               ? "bg-green-100 text-green-700"
                               : "bg-orange-100 text-orange-700"
                               }`}>
                               {transaction.type === "penjualan" ? "Penjualan" : "Restock"}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
-                            <Calendar className="w-4 h-4" />
-                            <span>{formatDate(transaction.CreatedAt)}</span>
+                          <div className="flex items-center gap-1 sm:gap-2 mt-0.5 sm:mt-1 text-xs sm:text-sm text-gray-500">
+                            <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+                            <span className="truncate">{formatDate(transaction.CreatedAt)}</span>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 sm:gap-3">
@@ -302,19 +302,19 @@ export default function TransactionsPage() {
                         key={transaction.ID}
                         layout
                         onClick={() => handleTransactionClick(transaction.ID, "penjualan")}
-                        className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all cursor-pointer group"
+                        className="bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all cursor-pointer group"
                       >
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
-                            <ShoppingCart className="w-6 h-6 text-green-600" />
+                        <div className="flex items-center gap-2 sm:gap-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-green-100 flex-shrink-0 flex items-center justify-center">
+                            <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                           </div>
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm sm:text-base font-semibold text-gray-900 truncate">
                               Penjualan #{transaction.ID}
                             </h3>
-                            <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
-                              <Calendar className="w-4 h-4" />
-                              <span>{formatDate(transaction.CreatedAt)}</span>
+                            <div className="flex items-center gap-1 sm:gap-2 mt-0.5 sm:mt-1 text-xs sm:text-sm text-gray-500">
+                              <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+                              <span className="truncate">{formatDate(transaction.CreatedAt)}</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 sm:gap-3">
@@ -382,19 +382,19 @@ export default function TransactionsPage() {
                         key={transaction.ID}
                         layout
                         onClick={() => handleTransactionClick(transaction.ID, "pembelian")}
-                        className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-orange-200 transition-all cursor-pointer group"
+                        className="bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-orange-200 transition-all cursor-pointer group"
                       >
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
-                            <PackagePlus className="w-6 h-6 text-orange-600" />
+                        <div className="flex items-center gap-2 sm:gap-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-orange-100 flex-shrink-0 flex items-center justify-center">
+                            <PackagePlus className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
                           </div>
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm sm:text-base font-semibold text-gray-900 truncate">
                               Pembelian #{transaction.ID}
                             </h3>
-                            <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
-                              <Calendar className="w-4 h-4" />
-                              <span>{formatDate(transaction.CreatedAt)}</span>
+                            <div className="flex items-center gap-1 sm:gap-2 mt-0.5 sm:mt-1 text-xs sm:text-sm text-gray-500">
+                              <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+                              <span className="truncate">{formatDate(transaction.CreatedAt)}</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-2 sm:gap-3">
