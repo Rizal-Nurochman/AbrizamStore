@@ -111,6 +111,15 @@ export default function TransactionsPage() {
     ...pembelianList.map(p => ({ ...p, type: "pembelian" as const })),
   ].sort((a, b) => new Date(b.CreatedAt).getTime() - new Date(a.CreatedAt).getTime());
 
+  // Pagination for "all" tab (frontend pagination of combined data)
+  const [allPage, setAllPage] = useState(1);
+  const allItemsPerPage = 10;
+  const allTotalPages = Math.ceil(allTransactions.length / allItemsPerPage);
+  const paginatedAllTransactions = allTransactions.slice(
+    (allPage - 1) * allItemsPerPage,
+    allPage * allItemsPerPage
+  );
+
   const tabs = [
     { id: "all" as const, label: "Semua", icon: ClipboardList },
     { id: "penjualan" as const, label: "Penjualan", icon: TrendingUp },
@@ -216,68 +225,93 @@ export default function TransactionsPage() {
                     <p className="text-gray-500">Belum ada transaksi</p>
                   </div>
                 ) : (
-                  allTransactions.map((transaction) => (
-                    <motion.div
-                      key={`${transaction.type}-${transaction.ID}`}
-                      layout
-                      onClick={() => handleTransactionClick(transaction.ID, transaction.type)}
-                      className="bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-violet-200 transition-all cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-2 sm:gap-4">
-                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex-shrink-0 flex items-center justify-center ${transaction.type === "penjualan"
-                          ? "bg-green-100"
-                          : "bg-orange-100"
-                          }`}>
-                          {transaction.type === "penjualan" ? (
-                            <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
-                          ) : (
-                            <PackagePlus className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
-                          )}
+                  <>
+                    {paginatedAllTransactions.map((transaction) => (
+                      <motion.div
+                        key={`${transaction.type}-${transaction.ID}`}
+                        layout
+                        onClick={() => handleTransactionClick(transaction.ID, transaction.type)}
+                        className="bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-violet-200 transition-all cursor-pointer group"
+                      >
+                        <div className="flex items-center gap-2 sm:gap-4">
+                          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex-shrink-0 flex items-center justify-center ${transaction.type === "penjualan"
+                            ? "bg-green-100"
+                            : "bg-orange-100"
+                            }`}>
+                            {transaction.type === "penjualan" ? (
+                              <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+                            ) : (
+                              <PackagePlus className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-sm sm:text-base font-semibold text-gray-900 truncate">
+                                {transaction.type === "penjualan" ? "Penjualan" : "Pembelian"} #{transaction.ID}
+                              </h3>
+                              <span className={`hidden sm:inline px-2 py-0.5 rounded-full text-xs font-medium ${transaction.type === "penjualan"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-orange-100 text-orange-700"
+                                }`}>
+                                {transaction.type === "penjualan" ? "Penjualan" : "Restock"}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1 sm:gap-2 mt-0.5 sm:mt-1 text-xs sm:text-sm text-gray-500">
+                              <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+                              <span className="truncate">{formatDate(transaction.CreatedAt)}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="text-right">
+                              <p className={`text-sm sm:text-lg font-bold ${transaction.type === "penjualan"
+                                ? "text-green-600"
+                                : "text-orange-600"
+                                }`}>
+                                {transaction.type === "penjualan" ? "+" : "-"}
+                                {formatCurrency(
+                                  transaction.type === "penjualan"
+                                    ? (transaction as typeof penjualanList[0]).total_penjualan
+                                    : (transaction as typeof pembelianList[0]).total_pembelian
+                                )}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Eye className="hidden sm:block w-5 h-5 text-violet-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                              <button
+                                onClick={(e) => handleDeleteClick(e, transaction.ID, transaction.type)}
+                                className="p-1.5 text-red-400 sm:text-gray-400 sm:opacity-0 sm:group-hover:opacity-100 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-sm sm:text-base font-semibold text-gray-900 truncate">
-                              {transaction.type === "penjualan" ? "Penjualan" : "Pembelian"} #{transaction.ID}
-                            </h3>
-                            <span className={`hidden sm:inline px-2 py-0.5 rounded-full text-xs font-medium ${transaction.type === "penjualan"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-orange-100 text-orange-700"
-                              }`}>
-                              {transaction.type === "penjualan" ? "Penjualan" : "Restock"}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1 sm:gap-2 mt-0.5 sm:mt-1 text-xs sm:text-sm text-gray-500">
-                            <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
-                            <span className="truncate">{formatDate(transaction.CreatedAt)}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 sm:gap-3">
-                          <div className="text-right">
-                            <p className={`text-sm sm:text-lg font-bold ${transaction.type === "penjualan"
-                              ? "text-green-600"
-                              : "text-orange-600"
-                              }`}>
-                              {transaction.type === "penjualan" ? "+" : "-"}
-                              {formatCurrency(
-                                transaction.type === "penjualan"
-                                  ? (transaction as typeof penjualanList[0]).total_penjualan
-                                  : (transaction as typeof pembelianList[0]).total_pembelian
-                              )}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Eye className="hidden sm:block w-5 h-5 text-violet-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <button
-                              onClick={(e) => handleDeleteClick(e, transaction.ID, transaction.type)}
-                              className="p-1.5 text-red-400 sm:text-gray-400 sm:opacity-0 sm:group-hover:opacity-100 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
+                      </motion.div>
+                    ))}
+
+                    {/* Pagination for All Tab */}
+                    {allTotalPages > 1 && (
+                      <div className="flex items-center justify-center gap-2 pt-4">
+                        <button
+                          onClick={() => setAllPage(p => Math.max(1, p - 1))}
+                          disabled={allPage === 1}
+                          className="p-2 rounded-lg bg-white border border-gray-200 disabled:opacity-50 hover:bg-gray-50"
+                        >
+                          <ChevronLeft className="w-5 h-5" />
+                        </button>
+                        <span className="text-sm text-gray-600">
+                          Halaman {allPage} dari {allTotalPages}
+                        </span>
+                        <button
+                          onClick={() => setAllPage(p => Math.min(allTotalPages, p + 1))}
+                          disabled={allPage === allTotalPages}
+                          className="p-2 rounded-lg bg-white border border-gray-200 disabled:opacity-50 hover:bg-gray-50"
+                        >
+                          <ChevronRight className="w-5 h-5" />
+                        </button>
                       </div>
-                    </motion.div>
-                  ))
+                    )}
+                  </>
                 )}
               </motion.div>
             )}

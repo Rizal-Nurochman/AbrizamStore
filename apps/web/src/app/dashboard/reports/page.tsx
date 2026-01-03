@@ -10,7 +10,9 @@ import {
   Calendar,
   Loader2,
   AlertTriangle,
-  Info
+  Info,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { useProfitLossReport } from "@/hooks/useReports";
 import jsPDF from "jspdf";
@@ -24,9 +26,19 @@ export default function ReportsPage() {
 
   const [startDate, setStartDate] = useState(thirtyDaysAgo.toISOString().split("T")[0]);
   const [endDate, setEndDate] = useState(today.toISOString().split("T")[0]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Fetch profit/loss report
   const { data: profitData, isLoading, error } = useProfitLossReport(startDate, endDate);
+
+  // Pagination for items
+  const items = profitData?.items || [];
+  const totalPages = Math.ceil(items.length / itemsPerPage);
+  const paginatedItems = items.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -169,14 +181,20 @@ export default function ReportsPage() {
           <input
             type="date"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            onChange={(e) => {
+              setStartDate(e.target.value);
+              setCurrentPage(1);
+            }}
             className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
           />
           <span className="text-gray-400">s/d</span>
           <input
             type="date"
             value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
+            onChange={(e) => {
+              setEndDate(e.target.value);
+              setCurrentPage(1);
+            }}
             className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
           />
         </div>
@@ -277,7 +295,7 @@ export default function ReportsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {profitData.items?.map((item, index) => (
+                  {paginatedItems.map((item, index) => (
                     <tr key={item.nama_produk} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                       <td className="px-4 py-3 text-sm font-medium text-gray-900">{item.nama_produk}</td>
                       <td className="px-4 py-3 text-sm text-center text-gray-600">{item.jumlah_terjual}</td>
@@ -286,7 +304,7 @@ export default function ReportsPage() {
                       <td className="px-4 py-3 text-sm text-right font-semibold text-green-600">{formatCurrency(item.laba)}</td>
                     </tr>
                   ))}
-                  {(!profitData.items || profitData.items.length === 0) && (
+                  {items.length === 0 && (
                     <tr>
                       <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
                         Belum ada produk terjual pada periode ini
@@ -294,7 +312,7 @@ export default function ReportsPage() {
                     </tr>
                   )}
                 </tbody>
-                {profitData.items && profitData.items.length > 0 && (
+                {items.length > 0 && (
                   <tfoot className="bg-gray-100">
                     <tr>
                       <td className="px-4 py-3 text-sm font-bold text-gray-900">TOTAL</td>
@@ -307,6 +325,29 @@ export default function ReportsPage() {
                 )}
               </table>
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 p-4 border-t border-gray-100">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-lg bg-gray-50 border border-gray-200 disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <span className="text-sm text-gray-600 px-3">
+                  Halaman {currentPage} dari {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-lg bg-gray-50 border border-gray-200 disabled:opacity-50 hover:bg-gray-100 transition-colors"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            )}
           </div>
         </motion.div>
       )}

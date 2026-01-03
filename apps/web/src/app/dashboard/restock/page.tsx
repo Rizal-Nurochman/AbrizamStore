@@ -12,7 +12,9 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { useProducts } from "@/hooks/useProducts";
 import { useCreatePembelian } from "@/hooks/useCreatePembelian";
@@ -23,14 +25,18 @@ export default function RestockPage() {
   const [cart, setCart] = useState<RestockCartItem[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showMobileCart, setShowMobileCart] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
-  // Fetch products with search
+  // Fetch products with search and pagination
   const { data: productsData, isLoading } = useProducts({
-    page: 1,
-    limit: 100,
+    page: currentPage,
+    limit: itemsPerPage,
     search: searchQuery
   });
   const products = productsData?.data || [];
+  const totalProducts = productsData?.meta?.total_items || 0;
+  const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
   const createPembelian = useCreatePembelian();
 
@@ -320,7 +326,10 @@ export default function RestockPage() {
               type="text"
               placeholder="Cari produk untuk restock..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
               className="w-full pl-12 pr-4 py-3 bg-white rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-shadow shadow-sm"
             />
           </div>
@@ -405,6 +414,29 @@ export default function RestockPage() {
                   );
                 })}
               </AnimatePresence>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 py-4 mt-4">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="p-2 rounded-lg bg-white border border-gray-200 disabled:opacity-50 hover:bg-gray-50 transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <span className="text-sm text-gray-600 px-3">
+                Halaman {currentPage} dari {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-lg bg-white border border-gray-200 disabled:opacity-50 hover:bg-gray-50 transition-colors"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
           )}
         </div>
