@@ -171,7 +171,6 @@ export default function RestockPage() {
             cart.map((item) => (
               <motion.div
                 key={item.product.ID}
-                layout
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
@@ -345,7 +344,6 @@ export default function RestockPage() {
                   return (
                     <motion.div
                       key={product.ID}
-                      layout
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
