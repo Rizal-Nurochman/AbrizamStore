@@ -251,9 +251,9 @@ export default function TransactionsPage() {
                             <span>{formatDate(transaction.CreatedAt)}</span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3">
                           <div className="text-right">
-                            <p className={`text-lg font-bold ${transaction.type === "penjualan"
+                            <p className={`text-sm sm:text-lg font-bold ${transaction.type === "penjualan"
                               ? "text-green-600"
                               : "text-orange-600"
                               }`}>
@@ -265,11 +265,11 @@ export default function TransactionsPage() {
                               )}
                             </p>
                           </div>
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Eye className="w-5 h-5 text-violet-500" />
+                          <div className="flex items-center gap-1">
+                            <Eye className="hidden sm:block w-5 h-5 text-violet-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                             <button
                               onClick={(e) => handleDeleteClick(e, transaction.ID, transaction.type)}
-                              className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              className="p-1.5 text-red-400 sm:text-gray-400 sm:opacity-0 sm:group-hover:opacity-100 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -317,15 +317,15 @@ export default function TransactionsPage() {
                               <span>{formatDate(transaction.CreatedAt)}</span>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <p className="text-lg font-bold text-green-600">
+                          <div className="flex items-center gap-2 sm:gap-3">
+                            <p className="text-sm sm:text-lg font-bold text-green-600">
                               +{formatCurrency(transaction.total_penjualan)}
                             </p>
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Eye className="w-5 h-5 text-green-500" />
+                            <div className="flex items-center gap-1">
+                              <Eye className="hidden sm:block w-5 h-5 text-green-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                               <button
                                 onClick={(e) => handleDeleteClick(e, transaction.ID, "penjualan")}
-                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                className="p-1.5 text-red-400 sm:text-gray-400 sm:opacity-0 sm:group-hover:opacity-100 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -397,15 +397,15 @@ export default function TransactionsPage() {
                               <span>{formatDate(transaction.CreatedAt)}</span>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <p className="text-lg font-bold text-orange-600">
+                          <div className="flex items-center gap-2 sm:gap-3">
+                            <p className="text-sm sm:text-lg font-bold text-orange-600">
                               -{formatCurrency(transaction.total_pembelian)}
                             </p>
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Eye className="w-5 h-5 text-orange-500" />
+                            <div className="flex items-center gap-1">
+                              <Eye className="hidden sm:block w-5 h-5 text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                               <button
                                 onClick={(e) => handleDeleteClick(e, transaction.ID, "pembelian")}
-                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                className="p-1.5 text-red-400 sm:text-gray-400 sm:opacity-0 sm:group-hover:opacity-100 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
