@@ -9,6 +9,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var jakartaLocation *time.Location
+
+func init() {
+	var err error
+	jakartaLocation, err = time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		jakartaLocation = time.FixedZone("WIB", 7*60*60)
+	}
+}
+
 type Handler interface {
 	GetSalesReport(c *gin.Context)
 	GetProfitLossReport(c *gin.Context)
@@ -24,28 +34,26 @@ func NewHandler(service Service) Handler {
 }
 
 func (h *handler) GetSalesReport(c *gin.Context) {
-	// Get user from context
 	user := c.MustGet("user").(entities.User)
 
-	// Parse date parameters
-	startDateStr := c.DefaultQuery("start_date", time.Now().AddDate(0, -1, 0).Format("2006-01-02"))
-	endDateStr := c.DefaultQuery("end_date", time.Now().Format("2006-01-02"))
+	now := time.Now().In(jakartaLocation)
+	startDateStr := c.DefaultQuery("start_date", now.AddDate(0, -1, 0).Format("2006-01-02"))
+	endDateStr := c.DefaultQuery("end_date", now.Format("2006-01-02"))
 
-	startDate, err := time.Parse("2006-01-02", startDateStr)
+	startDate, err := time.ParseInLocation("2006-01-02", startDateStr, jakartaLocation)
 	if err != nil {
 		res := utils.BuildResponseFailed("Invalid start_date format", err.Error(), utils.EmptyObj{})
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	endDate, err := time.Parse("2006-01-02", endDateStr)
+	endDate, err := time.ParseInLocation("2006-01-02", endDateStr, jakartaLocation)
 	if err != nil {
 		res := utils.BuildResponseFailed("Invalid end_date format", err.Error(), utils.EmptyObj{})
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	// Add end of day to endDate
 	endDate = endDate.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
 
 	report, err := h.service.GetSalesReport(startDate, endDate, user.ID)
@@ -60,28 +68,26 @@ func (h *handler) GetSalesReport(c *gin.Context) {
 }
 
 func (h *handler) GetProfitLossReport(c *gin.Context) {
-	// Get user from context
 	user := c.MustGet("user").(entities.User)
 
-	// Parse date parameters
-	startDateStr := c.DefaultQuery("start_date", time.Now().AddDate(0, -1, 0).Format("2006-01-02"))
-	endDateStr := c.DefaultQuery("end_date", time.Now().Format("2006-01-02"))
+	now := time.Now().In(jakartaLocation)
+	startDateStr := c.DefaultQuery("start_date", now.AddDate(0, -1, 0).Format("2006-01-02"))
+	endDateStr := c.DefaultQuery("end_date", now.Format("2006-01-02"))
 
-	startDate, err := time.Parse("2006-01-02", startDateStr)
+	startDate, err := time.ParseInLocation("2006-01-02", startDateStr, jakartaLocation)
 	if err != nil {
 		res := utils.BuildResponseFailed("Invalid start_date format", err.Error(), utils.EmptyObj{})
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	endDate, err := time.Parse("2006-01-02", endDateStr)
+	endDate, err := time.ParseInLocation("2006-01-02", endDateStr, jakartaLocation)
 	if err != nil {
 		res := utils.BuildResponseFailed("Invalid end_date format", err.Error(), utils.EmptyObj{})
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	// Add end of day to endDate
 	endDate = endDate.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
 
 	report, err := h.service.GetProfitLossReport(startDate, endDate, user.ID)
@@ -96,7 +102,6 @@ func (h *handler) GetProfitLossReport(c *gin.Context) {
 }
 
 func (h *handler) GetStockReport(c *gin.Context) {
-	// Get user from context
 	user := c.MustGet("user").(entities.User)
 
 	report, err := h.service.GetStockReport(user.ID)

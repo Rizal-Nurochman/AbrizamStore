@@ -30,7 +30,6 @@ func main() {
 
 	router := gin.Default()
 
-	// CORS configuration - support both local and production
 	allowedOrigins := []string{"http://localhost:3000", "http://localhost:5173"}
 	if frontendURL := os.Getenv("FRONTEND_URL"); frontendURL != "" {
 		allowedOrigins = append(allowedOrigins, frontendURL)

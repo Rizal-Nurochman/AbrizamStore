@@ -31,7 +31,7 @@ func ConnectionDatabase() {
 		sslmode = "disable"
 	}
 
-	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + dbport + " sslmode=" + sslmode + " TimeZone=Asia/Shanghai"
+	dsn := "host=" + host + " user=" + user + " password=" + password + " dbname=" + dbname + " port=" + dbport + " sslmode=" + sslmode + " TimeZone=Asia/Jakarta"
 	var err error
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -56,11 +56,8 @@ func ConnectionDatabase() {
 }
 
 func seedDefaultCategories(db *gorm.DB) {
-	// Fix: Rename existing "Lain-lain" (ID 3) to "Sembako" if "Sembako" doesn't exist yet
-	// This ensures products already saved with ID 3 will correctly show as "Sembako"
 	var existingSembako entities.Kategori
 	if err := db.Where("nama_kategori = ?", "Sembako").First(&existingSembako).Error; err == gorm.ErrRecordNotFound {
-		// Sembako doesn't exist, so rename "Lain-lain" to "Sembako"
 		var lainlain entities.Kategori
 		if err := db.Where("nama_kategori = ?", "Lain-lain").First(&lainlain).Error; err == nil {
 			db.Model(&lainlain).Update("nama_kategori", "Sembako")
@@ -68,7 +65,6 @@ func seedDefaultCategories(db *gorm.DB) {
 		}
 	}
 
-	// Now create default categories (including new "Lain-lain")
 	defaultCategories := []string{"Makanan", "Minuman", "Sembako", "Lain-lain"}
 
 	for _, name := range defaultCategories {
