@@ -13,6 +13,7 @@ type Repository interface {
 	CreateDetailPembelian(tx *gorm.DB, detail *entities.Detail_Pembelian) error
 	FindAll(limit int, offset int) ([]entities.Pembelian, int64, error)
 	FindByID(ID uint) (*entities.Pembelian, error)
+	Delete(ID uint) error
 }
 
 type repository struct {
@@ -70,4 +71,16 @@ func (r *repository) FindByID(ID uint) (*entities.Pembelian, error) {
 		return nil, err
 	}
 	return &pembelian, nil
+}
+
+func (r *repository) Delete(ID uint) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("id_pembelian = ?", ID).Delete(&entities.Detail_Pembelian{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Delete(&entities.Pembelian{}, ID).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 }

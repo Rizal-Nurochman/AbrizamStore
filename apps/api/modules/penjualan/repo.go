@@ -17,6 +17,7 @@ type Repository interface {
 	CreateDetailPenjualan(tx *gorm.DB, detail *entities.Detail_Penjualan) error
 	FindAll(limit int, offset int) ([]entities.Penjualan, int64, error)
 	FindByID(ID uint) (*entities.Penjualan, error)
+	Delete(ID uint) error
 }
 
 func NewRepository(db *gorm.DB) Repository {
@@ -62,12 +63,24 @@ func (r *repository) FindAll(limit int, offset int) ([]entities.Penjualan, int64
 func (r *repository) FindByID(ID uint) (*entities.Penjualan, error) {
 	var penjualan entities.Penjualan
 	err := r.db.
-		Preload("User").                               
-		Preload("DetailPenjualan").                          
-		Preload("DetailPenjualan.Produk").                   
+		Preload("User").
+		Preload("DetailPenjualan").
+		Preload("DetailPenjualan.Produk").
 		First(&penjualan, ID).Error
 	if err != nil {
 		return nil, err
 	}
 	return &penjualan, nil
+}
+
+func (r *repository) Delete(ID uint) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("id_penjualan = ?", ID).Delete(&entities.Detail_Penjualan{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Delete(&entities.Penjualan{}, ID).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 }

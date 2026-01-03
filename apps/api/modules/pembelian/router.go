@@ -17,5 +17,6 @@ func PembelianRouter(api *gin.RouterGroup, DB *gorm.DB) {
 		protected.POST("/", middleware.RequireRole("user"), pembelianHandler.CreatePembelian)
 		protected.GET("/", middleware.RequireRole("user"), pembelianHandler.GetAll)
 		protected.GET("/:id", middleware.RequireRole("user"), pembelianHandler.GetByID)
+		protected.DELETE("/:id", middleware.RequireRole("user"), pembelianHandler.DeletePembelian)
 	}
 }

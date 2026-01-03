@@ -17,6 +17,7 @@ type Service interface {
 	CreatePembelian(input dto.PembelianCreate, userID uint) (*entities.Pembelian, error)
 	GetAll(limit int, offset int) ([]entities.Pembelian, int64, error)
 	GetByID(ID uint) (*entities.Pembelian, error)
+	Delete(ID uint) error
 }
 
 func NewService(db *gorm.DB, r Repository) Service {
@@ -69,7 +70,7 @@ func (s *service) CreatePembelian(input dto.PembelianCreate, userID uint) (*enti
 	}
 
 	for _, detail := range detailsToCreate {
-		detail.ID_Pembelian = pembelian.ID 
+		detail.ID_Pembelian = pembelian.ID
 		if err := s.repository.CreateDetailPembelian(tx, &detail); err != nil {
 			return nil, err
 		}
@@ -88,4 +89,8 @@ func (s *service) GetAll(limit int, offset int) ([]entities.Pembelian, int64, er
 
 func (s *service) GetByID(ID uint) (*entities.Pembelian, error) {
 	return s.repository.FindByID(ID)
+}
+
+func (s *service) Delete(ID uint) error {
+	return s.repository.Delete(ID)
 }

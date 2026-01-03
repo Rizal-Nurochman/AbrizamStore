@@ -13,6 +13,7 @@ type Handler interface {
 	CreatePenjualan(c *gin.Context)
 	GetAll(c *gin.Context)
 	GetByID(c *gin.Context)
+	DeletePenjualan(c *gin.Context)
 }
 
 type handler struct {
@@ -25,7 +26,7 @@ func NewHandler(service Service) Handler {
 
 func (h *handler) CreatePenjualan(c *gin.Context) {
 	var input dto.PenjualanCreate
-	
+
 	// Validasi input JSON
 	if err := c.ShouldBindJSON(&input); err != nil {
 		res := utils.BuildResponseFailed("Input tidak valid", err.Error(), utils.EmptyObj{})
@@ -105,5 +106,25 @@ func (h *handler) GetByID(c *gin.Context) {
 	}
 
 	res := utils.BuildResponseSuccess("Sale detail retrieved successfully", penjualan)
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *handler) DeletePenjualan(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := utils.StringToInt(idStr)
+	if err != nil {
+		res := utils.BuildResponseFailed("Failed to convert ID", err.Error(), utils.EmptyObj{})
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	err = h.service.Delete(uint(id))
+	if err != nil {
+		res := utils.BuildResponseFailed("Failed to delete sale", err.Error(), utils.EmptyObj{})
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	res := utils.BuildResponseSuccess("Transaksi penjualan berhasil dihapus", nil)
 	c.JSON(http.StatusOK, res)
 }

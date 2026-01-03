@@ -12,10 +12,11 @@ type Service interface {
 	CreatePenjualan(input dto.PenjualanCreate, userID uint) (*entities.Penjualan, error)
 	GetAll(limit int, offset int) ([]entities.Penjualan, int64, error)
 	GetByID(ID uint) (*entities.Penjualan, error)
+	Delete(ID uint) error
 }
 
 type service struct {
-	db         *gorm.DB 
+	db         *gorm.DB
 	repository Repository
 }
 
@@ -90,4 +91,8 @@ func (s *service) GetAll(limit int, offset int) ([]entities.Penjualan, int64, er
 
 func (s *service) GetByID(ID uint) (*entities.Penjualan, error) {
 	return s.repository.FindByID(ID)
+}
+
+func (s *service) Delete(ID uint) error {
+	return s.repository.Delete(ID)
 }

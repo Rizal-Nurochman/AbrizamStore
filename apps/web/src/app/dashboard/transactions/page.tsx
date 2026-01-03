@@ -13,11 +13,15 @@ import {
   Receipt,
   ChevronLeft,
   ChevronRight,
-  Eye
+  Eye,
+  Trash2
 } from "lucide-react";
 import { usePenjualan } from "@/hooks/usePenjualan";
 import { usePembelian } from "@/hooks/usePembelian";
+import { useDeletePenjualan } from "@/hooks/useDeletePenjualan";
+import { useDeletePembelian } from "@/hooks/useDeletePembelian";
 import { TransactionDetailModal } from "@/components/TransactionDetailModal";
+import { ConfirmDeleteModal } from "@/components/ConfirmDeleteModal";
 
 type TabType = "all" | "penjualan" | "pembelian";
 
@@ -32,8 +36,18 @@ export default function TransactionsPage() {
     type: "penjualan" | "pembelian";
   } | null>(null);
 
+  // Delete confirmation state
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: number;
+    type: "penjualan" | "pembelian";
+  } | null>(null);
+
   const { data: penjualanData, isLoading: penjualanLoading } = usePenjualan({ page: penjualanPage, limit: 10 });
   const { data: pembelianData, isLoading: pembelianLoading } = usePembelian({ page: pembelianPage, limit: 10 });
+
+  // Delete mutations
+  const deletePenjualan = useDeletePenjualan();
+  const deletePembelian = useDeletePembelian();
 
   const penjualanList = penjualanData?.penjualans || [];
   const pembelianList = pembelianData?.pembelians || [];
@@ -41,6 +55,7 @@ export default function TransactionsPage() {
   const pembelianTotal = pembelianData?.total || 0;
 
   const isLoading = penjualanLoading || pembelianLoading;
+  const isDeleting = deletePenjualan.isPending || deletePembelian.isPending;
 
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -66,6 +81,28 @@ export default function TransactionsPage() {
   // Handle transaction click
   const handleTransactionClick = (id: number, type: "penjualan" | "pembelian") => {
     setSelectedTransaction({ id, type });
+  };
+
+  // Handle delete click
+  const handleDeleteClick = (e: React.MouseEvent, id: number, type: "penjualan" | "pembelian") => {
+    e.stopPropagation();
+    setDeleteTarget({ id, type });
+  };
+
+  // Confirm delete
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      if (deleteTarget.type === "penjualan") {
+        await deletePenjualan.mutateAsync(deleteTarget.id);
+      } else {
+        await deletePembelian.mutateAsync(deleteTarget.id);
+      }
+      setDeleteTarget(null);
+    } catch (error) {
+      console.error("Failed to delete:", error);
+    }
   };
 
   // Combine and sort transactions for "all" tab
@@ -140,8 +177,8 @@ export default function TransactionsPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 font-medium transition-all relative ${activeTab === tab.id
-                  ? "text-violet-600"
-                  : "text-gray-500 hover:text-gray-700"
+                ? "text-violet-600"
+                : "text-gray-500 hover:text-gray-700"
                 }`}
             >
               <tab.icon className="w-5 h-5" />
@@ -188,8 +225,8 @@ export default function TransactionsPage() {
                     >
                       <div className="flex items-center gap-4">
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${transaction.type === "penjualan"
-                            ? "bg-green-100"
-                            : "bg-orange-100"
+                          ? "bg-green-100"
+                          : "bg-orange-100"
                           }`}>
                           {transaction.type === "penjualan" ? (
                             <ShoppingCart className="w-6 h-6 text-green-600" />
@@ -203,8 +240,8 @@ export default function TransactionsPage() {
                               {transaction.type === "penjualan" ? "Penjualan" : "Pembelian"} #{transaction.ID}
                             </h3>
                             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${transaction.type === "penjualan"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-orange-100 text-orange-700"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-orange-100 text-orange-700"
                               }`}>
                               {transaction.type === "penjualan" ? "Penjualan" : "Restock"}
                             </span>
@@ -217,8 +254,8 @@ export default function TransactionsPage() {
                         <div className="flex items-center gap-3">
                           <div className="text-right">
                             <p className={`text-lg font-bold ${transaction.type === "penjualan"
-                                ? "text-green-600"
-                                : "text-orange-600"
+                              ? "text-green-600"
+                              : "text-orange-600"
                               }`}>
                               {transaction.type === "penjualan" ? "+" : "-"}
                               {formatCurrency(
@@ -228,8 +265,14 @@ export default function TransactionsPage() {
                               )}
                             </p>
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Eye className="w-5 h-5 text-violet-500" />
+                            <button
+                              onClick={(e) => handleDeleteClick(e, transaction.ID, transaction.type)}
+                              className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -278,8 +321,14 @@ export default function TransactionsPage() {
                             <p className="text-lg font-bold text-green-600">
                               +{formatCurrency(transaction.total_penjualan)}
                             </p>
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                               <Eye className="w-5 h-5 text-green-500" />
+                              <button
+                                onClick={(e) => handleDeleteClick(e, transaction.ID, "penjualan")}
+                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -352,8 +401,14 @@ export default function TransactionsPage() {
                             <p className="text-lg font-bold text-orange-600">
                               -{formatCurrency(transaction.total_pembelian)}
                             </p>
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                               <Eye className="w-5 h-5 text-orange-500" />
+                              <button
+                                onClick={(e) => handleDeleteClick(e, transaction.ID, "pembelian")}
+                                className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -396,6 +451,16 @@ export default function TransactionsPage() {
         onClose={() => setSelectedTransaction(null)}
         transactionId={selectedTransaction?.id || null}
         transactionType={selectedTransaction?.type || null}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleConfirmDelete}
+        isLoading={isDeleting}
+        title={`Hapus ${deleteTarget?.type === "penjualan" ? "Penjualan" : "Pembelian"}?`}
+        message="Transaksi yang dihapus tidak dapat dikembalikan. Namun, stok produk tidak akan berubah karena perubahan stok sudah tercatat sebelumnya."
       />
     </>
   );

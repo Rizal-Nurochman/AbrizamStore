@@ -17,6 +17,7 @@ type Handler interface {
 	CreatePembelian(c *gin.Context)
 	GetAll(c *gin.Context)
 	GetByID(c *gin.Context)
+	DeletePembelian(c *gin.Context)
 }
 
 func NewHandler(service Service) Handler {
@@ -101,5 +102,25 @@ func (h *handler) GetByID(c *gin.Context) {
 	}
 
 	res := utils.BuildResponseSuccess("Purchase detail retrieved successfully", pembelian)
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *handler) DeletePembelian(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := utils.StringToInt(idStr)
+	if err != nil {
+		res := utils.BuildResponseFailed("Failed to convert ID", err.Error(), utils.EmptyObj{})
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+
+	err = h.service.Delete(uint(id))
+	if err != nil {
+		res := utils.BuildResponseFailed("Failed to delete purchase", err.Error(), utils.EmptyObj{})
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	res := utils.BuildResponseSuccess("Transaksi pembelian berhasil dihapus", nil)
 	c.JSON(http.StatusOK, res)
 }
