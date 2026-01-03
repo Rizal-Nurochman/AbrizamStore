@@ -126,8 +126,8 @@ export function EditProductModal({ product, isOpen, onClose, onSuccess }: EditPr
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">Rp</span>
                       <input
                         type="number"
-                        value={formData.harga_beli}
-                        onChange={(e) => setFormData({ ...formData, harga_beli: parseInt(e.target.value) || 0 })}
+                        value={formData.harga_beli || ""}
+                        onChange={(e) => setFormData({ ...formData, harga_beli: e.target.value === "" ? 0 : parseInt(e.target.value) })}
                         onWheel={(e) => e.currentTarget.blur()}
                         className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                         required
@@ -143,8 +143,8 @@ export function EditProductModal({ product, isOpen, onClose, onSuccess }: EditPr
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">Rp</span>
                       <input
                         type="number"
-                        value={formData.harga_jual}
-                        onChange={(e) => setFormData({ ...formData, harga_jual: parseInt(e.target.value) || 0 })}
+                        value={formData.harga_jual || ""}
+                        onChange={(e) => setFormData({ ...formData, harga_jual: e.target.value === "" ? 0 : parseInt(e.target.value) })}
                         onWheel={(e) => e.currentTarget.blur()}
                         className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                         required
@@ -161,8 +161,8 @@ export function EditProductModal({ product, isOpen, onClose, onSuccess }: EditPr
                   </label>
                   <input
                     type="number"
-                    value={formData.stok}
-                    onChange={(e) => setFormData({ ...formData, stok: parseInt(e.target.value) || 0 })}
+                    value={formData.stok || ""}
+                    onChange={(e) => setFormData({ ...formData, stok: e.target.value === "" ? 0 : parseInt(e.target.value) })}
                     onWheel={(e) => e.currentTarget.blur()}
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                     required
