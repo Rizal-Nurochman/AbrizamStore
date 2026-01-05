@@ -26,7 +26,7 @@ export function Sidebar() {
     <div className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-white/80 backdrop-blur-xl border-r border-gray-200/50 shadow-sm z-50">
       <div className="p-6">
         <h1 className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
-          Warungku
+          DODOLAN
         </h1>
       </div>
 
@@ -69,7 +69,7 @@ export function MobileHeader({ onMenuClick }: { onMenuClick: () => void }) {
   return (
     <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white/90 backdrop-blur-xl border-b border-gray-200/50 shadow-sm z-40 flex items-center justify-between px-4">
       <h1 className="text-xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
-        Warungku
+        DODOLAN
       </h1>
       <button
         onClick={onMenuClick}
@@ -107,7 +107,7 @@ export function MobileSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: (
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-100">
           <h1 className="text-xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
-            Warungku
+            DODOLAN
           </h1>
           <button
             onClick={onClose}
