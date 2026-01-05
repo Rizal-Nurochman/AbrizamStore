@@ -19,7 +19,7 @@ export default function Home() {
                 <Box className="h-5 w-5" />
               </div>
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
-                Warungku
+                DODOLAN
               </span>
             </Link>
 
@@ -41,7 +41,7 @@ export default function Home() {
                 href="/register"
                 className="rounded-full bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 hover:shadow-indigo-500/40 transition-all active:scale-95"
               >
-                Buat Akun Warung
+                Mulai Berjualan
               </Link>
             </div>
 
@@ -86,7 +86,7 @@ export default function Home() {
                   className="w-full text-center rounded-xl bg-indigo-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 transition-all active:scale-95"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Buat Akun Warung
+                  Mulai Berjualan
                 </Link>
               </div>
             </div>
@@ -106,16 +106,16 @@ export default function Home() {
             <div className="w-full lg:w-1/2 bg-transparent text-center lg:text-left z-10">
               <div className="inline-flex items-center rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-sm font-medium text-indigo-600 dark:border-indigo-900/50 dark:bg-indigo-900/20 dark:text-indigo-400 mb-6 animate-fade-in">
                 <span className="flex h-2 w-2 rounded-full bg-indigo-600 mr-2"></span>
-                Solusi #1 untuk Warung Modern
+                Solusi #1 untuk UMKM Modern
               </div>
               <h1 className="text-4xl lg:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-white mb-6 leading-tight animate-slide-up">
-                Kelola Warung Impianmu, <br />
+                Kelola Bisnismu, <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
                   Semudah Sentuhan Jari.
                 </span>
               </h1>
               <p className="text-lg text-zinc-600 dark:text-zinc-300 mb-8 max-w-2xl mx-auto lg:mx-0 animate-slide-up-delayed leading-relaxed">
-                Tingkatkan efisiensi warung Anda dengan sistem manajemen stok pintar,
+                Tingkatkan efisiensi bisnis Anda dengan sistem manajemen stok pintar,
                 kasir digital, dan laporan keuangan otomatis. Semua dalam satu aplikasi.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 animate-slide-up-delayed" style={{ animationDelay: "0.4s" }}>
@@ -136,7 +136,7 @@ export default function Home() {
                 <div className="relative z-10 rounded-2xl bg-white border border-white/20 shadow-2xl overflow-hidden glass-card p-2 dark:bg-zinc-900/50">
                   <Image
                     src="/images/dashboard-mockup.png"
-                    alt="Warungku Dashboard"
+                    alt="DODOLAN Dashboard"
                     width={800}
                     height={600}
                     className="rounded-xl w-full h-auto"
@@ -307,10 +307,10 @@ export default function Home() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
               <Box className="h-5 w-5" />
             </div>
-            <span className="text-xl font-bold text-zinc-900 dark:text-white">Warungku</span>
+            <span className="text-xl font-bold text-zinc-900 dark:text-white">DODOLAN</span>
           </div>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            &copy; {new Date().getFullYear()} Warungku. All rights reserved.
+            &copy; {new Date().getFullYear()} DODOLAN. All rights reserved.
           </p>
         </div>
       </footer>

@@ -77,11 +77,11 @@ func GetVerificationEmailTemplate(otp string) string {
 <body>
     <div class="container">
         <div class="header">
-            <h1>AbrizamStore</h1>
+            <h1>DODOLAN</h1>
         </div>
         <div class="content">
             <div class="greeting">Halo,</div>
-            <p>Terima kasih telah mendaftar di AbrizamStore. Untuk mengamankan akun Anda, silakan gunakan kode verifikasi di bawah ini:</p>
+            <p>Terima kasih telah mendaftar di DODOLAN. Untuk mengamankan akun Anda, silakan gunakan kode verifikasi di bawah ini:</p>
             
             <div class="otp-box">
                 <div class="otp-code">%s</div>
@@ -91,7 +91,7 @@ func GetVerificationEmailTemplate(otp string) string {
             <p>Jika Anda tidak merasa melakukan permintaan pendaftaran ini, silakan abaikan email ini. Akun Anda tidak akan aktif tanpa verifikasi.</p>
         </div>
         <div class="footer">
-            &copy; 2025 AbrizamStore. All rights reserved.
+            &copy; 2025 DODOLAN. All rights reserved.
         </div>
     </div>
 </body>
