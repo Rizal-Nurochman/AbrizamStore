@@ -160,6 +160,25 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Filosofi DODOLAN Section */}
+      <section className="py-16 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/50 dark:to-purple-950/50">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 mb-6 shadow-lg shadow-indigo-500/30">
+              <Box className="h-8 w-8 text-white" />
+            </div>
+            <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-4">
+              Apa itu <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">DODOLAN</span>?
+            </h2>
+            <p className="text-lg text-zinc-600 dark:text-zinc-300 leading-relaxed">
+              <span className="font-semibold text-indigo-600 dark:text-indigo-400">&quot;Dodolan&quot;</span> berasal dari bahasa Jawa yang artinya <span className="font-semibold">&quot;berjualan&quot;</span>.
+              Filosofi ini mencerminkan semangat kami untuk membantu para pedagang dan pemilik usaha dalam mengelola bisnis mereka dengan mudah dan efisien.
+              Dari warung kecil hingga toko besar, DODOLAN hadir sebagai partner digital Anda.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section (Bento Grid) */}
       <section id="features" className="py-24 bg-white dark:bg-zinc-900/50">
         <div className="container mx-auto px-6">
