@@ -24,7 +24,7 @@ type User struct {
 	IsVerified             bool      `json:"is_verified" gorm:"default:false"`
 	VerificationCode       string    `json:"verification_code" gorm:"omitempty"`
 	VerificationCodeExpiry time.Time `json:"verification_code_expiry" gorm:"omitempty"`
-	ResetPasswordToken     string    `json:"reset_password_token" gorm:"omitempty"`
+	ResetPasswordToken     string    `json:"reset_password_token" gorm:"index;omitempty"`
 	ResetPasswordExpiry    time.Time `json:"reset_password_expiry" gorm:"omitempty"`
 
 	Pembelian []Pembelian `gorm:"foreignKey:ID_User"`

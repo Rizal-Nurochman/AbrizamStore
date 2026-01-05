@@ -7,13 +7,13 @@ type Produk struct {
 	Nama_Produk string `json:"nama_produk"`
 	Harga_Beli  int    `json:"harga_beli"`
 	Harga_Jual  int    `json:"harga_jual"`
-	Stok        int    `json:"stok"`
+	Stok        int    `json:"stok" gorm:"index"`
 	Foto_Produk string `json:"foto_produk"`
 
-	ID_User *uint `json:"id_user"`
+	ID_User *uint `json:"id_user" gorm:"index"`
 	User    User  `gorm:"foreignKey:ID_User"`
 
-	ID_Kategori *uint    `json:"id_kategori"`
+	ID_Kategori *uint    `json:"id_kategori" gorm:"index"`
 	Kategori    Kategori `gorm:"foreignKey:ID_Kategori"`
 
 	DetailPembelian []Detail_Pembelian `gorm:"foreignKey:ID_Produk"`
