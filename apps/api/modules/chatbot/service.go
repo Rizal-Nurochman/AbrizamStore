@@ -464,7 +464,8 @@ func (s *service) callGeminiAPI(prompt string) (string, error) {
 		return "", fmt.Errorf("GEMINI_API_KEY not configured")
 	}
 
-	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=%s", apiKey)
+	// Using gemini-2.5-flash
+	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=%s", apiKey)
 
 	requestBody := dto.GeminiRequest{
 		Contents: []dto.GeminiContent{
