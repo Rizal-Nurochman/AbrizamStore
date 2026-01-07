@@ -1,9 +1,26 @@
 "use client";
 
-import { useState, useRef, useEffect, FormEvent } from "react";
+import { useState, useRef, useEffect, FormEvent, useMemo } from "react";
 import { useChatbot } from "@/hooks/useChatbot";
 
 const MAX_MESSAGE_LENGTH = 500;
+
+// Simple markdown to HTML converter
+function formatMessage(text: string): string {
+  return text
+    // Bold: **text** or __text__
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/__(.+?)__/g, '<strong>$1</strong>')
+    // Italic: *text* or _text_
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/_([^_]+)_/g, '<em>$1</em>')
+    // Bullet points: * item or - item at start of line
+    .replace(/^[\*\-]\s+(.+)$/gm, '• $1')
+    // Numbered lists: 1. item
+    .replace(/^(\d+)\.\s+(.+)$/gm, '$1. $2')
+    // Line breaks
+    .replace(/\n/g, '<br/>');
+}
 
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -182,7 +199,14 @@ export function ChatWidget() {
                   }
                 `}
               >
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                {message.role === "user" ? (
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                ) : (
+                  <div
+                    className="text-sm prose prose-sm max-w-none prose-strong:font-semibold"
+                    dangerouslySetInnerHTML={{ __html: formatMessage(message.content) }}
+                  />
+                )}
                 <p className={`text-xs mt-1 ${message.role === "user" ? "text-white/60" : "text-gray-400"}`}>
                   {message.timestamp.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
                 </p>
