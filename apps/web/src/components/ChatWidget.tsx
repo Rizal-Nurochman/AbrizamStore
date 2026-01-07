@@ -101,8 +101,8 @@ export function ChatWidget() {
               </svg>
             </div>
             <div>
-              <h3 className="text-white font-semibold">AI Business Analyst</h3>
-              <p className="text-white/70 text-sm">Maks 20 pertanyaan/jam</p>
+              <h3 className="text-white font-semibold">DODOLAN AI</h3>
+              <p className="text-white/70 text-sm">Maksimal 20 pertanyaan/jam</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -135,9 +135,9 @@ export function ChatWidget() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <h4 className="font-semibold text-gray-800 mb-2">Halo! Saya AI Business Analyst</h4>
+              <h4 className="font-semibold text-gray-800 mb-2">Halo! Saya Dodolan AI</h4>
               <p className="text-gray-500 text-sm mb-4">
-                Saya siap membantu menganalisis data bisnis Anda dan memberikan insight untuk pengembangan usaha.
+                Saya siap membantu menganalisis data bisnis kamu dan memberikan insight untuk pengembangan usaha kamu.
               </p>
               <div className="space-y-2 w-full max-w-xs">
                 {[
