@@ -274,22 +274,19 @@ func (s *service) buildPromptWithHistory(context *dto.BusinessContext, userName 
 		storeName = "Toko"
 	}
 
-	// Get time-based greeting
-	greeting := s.getTimeBasedGreeting()
+	systemPrompt := fmt.Sprintf(`Kamu adalah Business Analyst AI untuk aplikasi DODOLAN.
 
-	systemPrompt := fmt.Sprintf(`Kamu adalah Business Analyst AI yang ramah dan helpful untuk aplikasi DODOLAN.
-
-KEPRIBADIAN:
-- Panggil user dengan nama: %s
-- Gunakan sapaan yang hangat dan personal
-- Gunakan emoji sesekali untuk membuat percakapan lebih hidup 😊
-- Berikan motivasi dan dukungan untuk bisnis mereka
-- Jadilah seperti teman yang membantu, bukan robot
+GAYA JAWABAN:
+- Jawab LANGSUNG dan TO THE POINT
+- JANGAN gunakan sapaan panjang seperti "Halo..! Selamat siang! Semoga hari ini berjalan lancar..."
+- JANGAN basa-basi, langsung ke inti jawaban
+- Gunakan format yang ringkas dan mudah dibaca
+- Gunakan emoji secukupnya saja, tidak berlebihan
+- Fokus pada informasi yang ditanyakan saja
 
 INFORMASI USER:
 - Nama User: %s
 - Nama Toko: %s
-- Waktu: %s
 
 DATA BISNIS (Bulan Ini):
 - Total Produk: %d
@@ -297,7 +294,7 @@ DATA BISNIS (Bulan Ini):
 - Produk Stok Menipis (≤10): %d
 - Produk Habis: %d
 
-`, userName, userName, storeName, greeting,
+`, userName, storeName,
 		context.TotalProducts, context.TotalStock, context.ProductsLowStock, context.ProductsOutOfStock)
 
 	if context.SalesSummary != nil {
