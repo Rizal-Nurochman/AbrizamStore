@@ -6,6 +6,7 @@ import (
 
 	"github.com/abrizamstore/database/migrations"
 	"github.com/abrizamstore/modules/auth"
+	"github.com/abrizamstore/modules/chatbot"
 	"github.com/abrizamstore/modules/dashboard"
 	"github.com/abrizamstore/modules/kategori"
 	"github.com/abrizamstore/modules/pembelian"
@@ -53,6 +54,7 @@ func main() {
 		pembelian.PembelianRouter(api, DB)
 		dashboard.DashboardRouter(api, DB)
 		reports.ReportsRouter(api, DB)
+		chatbot.ChatbotRouter(api, DB)
 	}
 
 	port := os.Getenv("GOLANG_PORT")

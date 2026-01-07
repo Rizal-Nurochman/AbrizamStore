@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Sidebar, MobileHeader, MobileSidebar } from "@/components/Sidebar";
 import { UserNav } from "@/components/UserNav";
+import { ChatWidget } from "@/components/ChatWidget";
 
 export default function DashboardLayout({
   children,
@@ -38,6 +39,10 @@ export default function DashboardLayout({
           </div>
         </div>
       </main>
+
+      {/* AI Business Analyst Chatbot */}
+      <ChatWidget />
     </div>
   );
 }
+
