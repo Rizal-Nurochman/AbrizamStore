@@ -119,7 +119,6 @@ export function ChatWidget() {
             </div>
             <div>
               <h3 className="text-white font-semibold">DODOLAN AI</h3>
-              <p className="text-white/70 text-sm">Maksimal 20 pertanyaan/jam</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -171,17 +170,7 @@ export function ChatWidget() {
                   </button>
                 ))}
               </div>
-              {/* Privacy Disclaimer */}
-              <div className="mt-6 p-3 bg-amber-50 border border-amber-200 rounded-xl max-w-xs">
-                <div className="flex items-start gap-2">
-                  <svg className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <p className="text-xs text-amber-800">
-                    Data bisnis Anda diproses oleh AI (Google Gemini) untuk memberikan analisis. Kami tidak menyimpan percakapan Anda secara permanen.
-                  </p>
-                </div>
-              </div>
+
             </div>
           )}
 
@@ -265,6 +254,10 @@ export function ChatWidget() {
               </svg>
             </button>
           </div>
+          {/* Disclaimer */}
+          <p className="text-xs text-gray-400 text-center mt-2">
+            Data bisnis Anda diproses oleh AI untuk memberikan analisis. Dodolan AI dapat membuat kesalahan, jadi periksa kembali responsnya.
+          </p>
         </form>
       </div>
     </>
