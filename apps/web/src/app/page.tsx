@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight, BarChart3, Box, ShoppingCart, Zap, ShieldCheck, Heart, Menu, X } from "lucide-react";
+import { ArrowRight, BarChart3, Box, ShoppingCart, Zap, ShieldCheck, Heart, Menu, X, MessageCircle } from "lucide-react";
 
 export default function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -270,6 +270,26 @@ export default function Home() {
               <p className="text-zinc-600 dark:text-zinc-400">
                 Data Anda disimpan dengan enkripsi tingkat tinggi. Backup otomatis setiap hari agar Anda tenang.
               </p>
+            </div>
+
+            {/* Feature 5: AI Chatbot */}
+            <div className="group relative rounded-3xl bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-900/20 dark:to-indigo-900/20 border border-violet-100 dark:border-violet-800/50 p-8 hover:shadow-2xl hover:shadow-violet-500/20 transition-all hover:-translate-y-1 md:col-span-2 overflow-hidden">
+              <div className="flex flex-col md:flex-row gap-8 items-center h-full">
+                <div className="flex-1 z-10">
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/30">
+                    <MessageCircle className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-3">Asisten AI Cerdas</h3>
+                  <p className="text-zinc-600 dark:text-zinc-400">
+                    Chatbot AI yang siap membantu menganalisis data bisnis Anda. Tanyakan performa penjualan, produk terlaris, kondisi stok, dan insight bisnis lainnya dalam bahasa yang mudah dipahami.
+                  </p>
+                </div>
+                {/* Visual: Chat Bubbles */}
+                <div className="hidden md:flex w-1/3 flex-col gap-2 p-4 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-100 dark:border-zinc-700 shadow-sm opacity-80 group-hover:scale-105 transition-transform duration-500">
+                  <div className="self-end bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs px-3 py-2 rounded-xl rounded-br-sm max-w-[80%]">Produk apa yang paling laku?</div>
+                  <div className="self-start bg-zinc-100 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs px-3 py-2 rounded-xl rounded-bl-sm max-w-[80%]">Produk terlaris adalah Indomie dengan 150 unit terjual 📊</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
