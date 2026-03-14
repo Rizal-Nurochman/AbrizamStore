@@ -239,69 +239,70 @@ export default function ReportsPage() {
 
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-              <p className="text-sm text-gray-500 mb-1">Total Modal</p>
-              <p className="text-2xl font-bold text-orange-600">{formatCurrency(profitData.total_modal)}</p>
+            <div className="bg-white rounded-lg p-5 border border-gray-300">
+              <p className="text-xs uppercase tracking-wider text-gray-500 mb-1">Total Modal</p>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(profitData.total_modal)}</p>
               <p className="text-xs text-gray-400 mt-1">Uang yang dikeluarkan</p>
             </div>
-            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-              <p className="text-sm text-gray-500 mb-1">Total Penjualan</p>
-              <p className="text-2xl font-bold text-blue-600">{formatCurrency(profitData.total_penjualan)}</p>
+            <div className="bg-white rounded-lg p-5 border border-gray-300">
+              <p className="text-xs uppercase tracking-wider text-gray-500 mb-1">Total Penjualan</p>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(profitData.total_penjualan)}</p>
               <p className="text-xs text-gray-400 mt-1">Uang yang masuk</p>
             </div>
-            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-              <p className="text-sm text-green-600 mb-1">Total Laba</p>
-              <p className="text-2xl font-bold text-green-600">{formatCurrency(profitData.total_laba)}</p>
-              <p className="text-xs text-green-500 mt-1">Keuntungan bersih ✨</p>
+            <div className="bg-white rounded-lg p-5 border-2 border-gray-900">
+              <p className="text-xs uppercase tracking-wider text-gray-500 mb-1">Total Laba</p>
+              <p className="text-2xl font-bold text-gray-900">{formatCurrency(profitData.total_laba)}</p>
+              <p className="text-xs text-gray-500 mt-1">Keuntungan bersih</p>
             </div>
-            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-              <p className="text-sm text-gray-500 mb-1">Margin Rata-rata</p>
-              <p className="text-2xl font-bold text-violet-600">{profitData.margin_rata_rata.toFixed(1)}%</p>
+            <div className="bg-white rounded-lg p-5 border border-gray-300">
+              <p className="text-xs uppercase tracking-wider text-gray-500 mb-1">Margin Rata-rata</p>
+              <p className="text-2xl font-bold text-gray-900">{profitData.margin_rata_rata.toFixed(1)}%</p>
               <p className="text-xs text-gray-400 mt-1">Persentase keuntungan</p>
             </div>
           </div>
 
           {/* Best Product */}
           {profitData.produk_paling_untung && (
-            <div className="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4 mb-6 border border-yellow-200">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">🏆</span>
+            <div className="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-300">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">#1</span>
+                </div>
                 <div>
-                  <p className="text-sm text-amber-700">Produk Paling Menguntungkan</p>
-                  <p className="font-bold text-amber-900">{profitData.produk_paling_untung} - Laba {formatCurrency(profitData.laba_tertinggi)}</p>
+                  <p className="text-xs uppercase tracking-wider text-gray-500">Produk Paling Menguntungkan</p>
+                  <p className="font-bold text-gray-900">{profitData.produk_paling_untung} — Laba {formatCurrency(profitData.laba_tertinggi)}</p>
                 </div>
               </div>
             </div>
           )}
 
           {/* Table */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="p-4 border-b border-gray-100">
-              <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-violet-600" />
+          <div className="bg-white rounded-lg border border-gray-300 overflow-hidden">
+            <div className="p-4 border-b border-gray-300 bg-gray-50">
+              <h3 className="font-semibold text-gray-900">
                 Detail Produk Terjual
               </h3>
               <p className="text-sm text-gray-500 mt-1">Klik &quot;Export PDF&quot; untuk menyimpan laporan lengkap</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Produk</th>
-                    <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Terjual</th>
-                    <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Modal</th>
-                    <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Penjualan</th>
-                    <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Laba</th>
+                <thead>
+                  <tr className="border-b-2 border-gray-900">
+                    <th className="px-4 py-3 text-left text-xs uppercase tracking-wider font-bold text-gray-700">Produk</th>
+                    <th className="px-4 py-3 text-center text-xs uppercase tracking-wider font-bold text-gray-700">Terjual</th>
+                    <th className="px-4 py-3 text-right text-xs uppercase tracking-wider font-bold text-gray-700">Modal</th>
+                    <th className="px-4 py-3 text-right text-xs uppercase tracking-wider font-bold text-gray-700">Penjualan</th>
+                    <th className="px-4 py-3 text-right text-xs uppercase tracking-wider font-bold text-gray-700">Laba</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paginatedItems.map((item, index) => (
-                    <tr key={item.nama_produk} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                    <tr key={item.nama_produk} className={`border-b border-gray-200 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
                       <td className="px-4 py-3 text-sm font-medium text-gray-900">{item.nama_produk}</td>
-                      <td className="px-4 py-3 text-sm text-center text-gray-600">{item.jumlah_terjual}</td>
-                      <td className="px-4 py-3 text-sm text-right text-orange-600">{formatCurrency(item.total_modal)}</td>
-                      <td className="px-4 py-3 text-sm text-right text-blue-600">{formatCurrency(item.total_penjualan)}</td>
-                      <td className="px-4 py-3 text-sm text-right font-semibold text-green-600">{formatCurrency(item.laba)}</td>
+                      <td className="px-4 py-3 text-sm text-center text-gray-700">{item.jumlah_terjual}</td>
+                      <td className="px-4 py-3 text-sm text-right text-gray-700">{formatCurrency(item.total_modal)}</td>
+                      <td className="px-4 py-3 text-sm text-right text-gray-700">{formatCurrency(item.total_penjualan)}</td>
+                      <td className="px-4 py-3 text-sm text-right font-semibold text-gray-900">{formatCurrency(item.laba)}</td>
                     </tr>
                   ))}
                   {items.length === 0 && (
@@ -313,13 +314,13 @@ export default function ReportsPage() {
                   )}
                 </tbody>
                 {items.length > 0 && (
-                  <tfoot className="bg-gray-100">
-                    <tr>
+                  <tfoot>
+                    <tr className="border-t-2 border-gray-900 bg-gray-50">
                       <td className="px-4 py-3 text-sm font-bold text-gray-900">TOTAL</td>
                       <td className="px-4 py-3"></td>
-                      <td className="px-4 py-3 text-sm text-right font-bold text-orange-600">{formatCurrency(profitData.total_modal)}</td>
-                      <td className="px-4 py-3 text-sm text-right font-bold text-blue-600">{formatCurrency(profitData.total_penjualan)}</td>
-                      <td className="px-4 py-3 text-sm text-right font-bold text-green-600">{formatCurrency(profitData.total_laba)}</td>
+                      <td className="px-4 py-3 text-sm text-right font-bold text-gray-900">{formatCurrency(profitData.total_modal)}</td>
+                      <td className="px-4 py-3 text-sm text-right font-bold text-gray-900">{formatCurrency(profitData.total_penjualan)}</td>
+                      <td className="px-4 py-3 text-sm text-right font-bold text-gray-900">{formatCurrency(profitData.total_laba)}</td>
                     </tr>
                   </tfoot>
                 )}
