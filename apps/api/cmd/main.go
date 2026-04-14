@@ -57,7 +57,10 @@ func main() {
 		chatbot.ChatbotRouter(api, DB)
 	}
 
-	port := os.Getenv("GOLANG_PORT")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = os.Getenv("GOLANG_PORT")
+	}
 	if port == "" {
 		port = "8080"
 	}

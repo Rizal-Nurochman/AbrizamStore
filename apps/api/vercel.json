@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "go build -ldflags \"-s -w\" -o main ./cmd",
+  "outputDirectory": ".",
+  "framework": null,
+  "installCommand": "",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
